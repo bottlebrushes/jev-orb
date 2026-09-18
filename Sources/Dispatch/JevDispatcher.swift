@@ -81,16 +81,10 @@ public final class JevDispatcher: @unchecked Sendable {
 
         NSLog("[JevDispatcher Native Execution] Executing action: %@ at (%d, %d)", type, x, y)
 
-        if type == "replace_text" {
+        if type == "replace_text" || type == "type_text" {
             InputDriver.shared.replaceTextAt(x: x, y: y, text: text)
         } else if type == "click" {
             InputDriver.shared.clickAt(x: x, y: y)
-        } else if type == "type_text" {
-            InputDriver.shared.clickAt(x: x, y: y)
-            usleep(50000)
-            InputDriver.shared.typeText(text)
-            usleep(50000)
-            InputDriver.shared.pressKey(keyCode: 36)
         }
     }
 }

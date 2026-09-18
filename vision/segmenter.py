@@ -1,5 +1,5 @@
 # @acid: VISION-1, VISION-2, VISION-3, VISION-4, FUSION-1, FUSION-2, FUSION-3, FUSION-4
-"""On-device UI element segmentation, spatial OCR fusion, and window ownership tagging."""
+"""Dual-model on-device UI element + group segmentation and spatial OCR fusion."""
 
 import os
 import subprocess
@@ -11,8 +11,11 @@ from ocrmac import ocrmac
 from huggingface_hub import hf_hub_download
 import Quartz.CoreGraphics as CG
 
-MODEL_REPO = "MacPaw/yolov11l-ui-elements-detection"
-MODEL_FILE = "ui-elements-detection.pt"
+ELEMENTS_REPO = "MacPaw/yolov11l-ui-elements-detection"
+ELEMENTS_FILE = "ui-elements-detection.pt"
+
+GROUPS_REPO = "MacPaw/yolov11l-ui-groups-detection"
+GROUPS_FILE = "ui-groups-detection.pt"
 
 def get_on_screen_windows():
     """Retrieve on-screen application windows and their bounding rectangles."""
@@ -44,9 +47,12 @@ def resolve_app(x: int, y: int, windows: list) -> str:
 
 class UISegmenter:
     def __init__(self):
-        model_path = hf_hub_download(repo_id=MODEL_REPO, filename=MODEL_FILE)
-        self.model = YOLO(model_path)
-        self.classes = self.model.names
+        # Load both Screen2AX models: elements (icons/buttons) and groups (containers/address bars)
+        elements_path = hf_hub_download(repo_id=ELEMENTS_REPO, filename=ELEMENTS_FILE)
+        groups_path = hf_hub_download(repo_id=GROUPS_REPO, filename=GROUPS_FILE)
+        
+        self.elements_model = YOLO(elements_path)
+        self.groups_model = YOLO(groups_path)
 
     def capture_screen(self, output_path: str = "/tmp/jev_screen.png") -> str:
         """Capture the current screen if not already provided."""
@@ -55,61 +61,66 @@ class UISegmenter:
         return output_path
 
     def analyze(self, image_path: str = "/tmp/jev_screen.png") -> dict:
-        """Runs YOLO UI detection + Apple Vision OCR and tags each element with its owning app."""
+        """Runs dual YOLO detection + Apple Vision OCR and fuses all elements."""
         if not os.path.exists(image_path):
             image_path = self.capture_screen(image_path)
 
         img = Image.open(image_path)
         width, height = img.size
-
-        # Retina scale factor (Retina display images are 2x logical points)
         retina_factor = 2.0 if width > 2000 else 1.0
-
-        # Query on-screen window boundaries
         windows = get_on_screen_windows()
 
         t0 = time.perf_counter()
-        yolo_res = self.model(img, verbose=False)[0]
+        # 1. Detect UI elements (icons, buttons, links, textareas)
+        el_boxes = self.elements_model(img, verbose=False)[0].boxes
+        # 2. Detect UI groups & containers (address bars, cards, input groups)
+        grp_boxes = self.groups_model(img, verbose=False)[0].boxes
         t_yolo = time.perf_counter() - t0
 
         t0 = time.perf_counter()
+        # 3. Apple Vision on-device OCR
         ocr_res = ocrmac.OCR(img, language_preference=['en-US']).recognize(px=True)
         t_ocr = time.perf_counter() - t0
 
-        boxes = yolo_res.boxes
+        # Combine detected boxes
+        all_detected = []
+        for b in el_boxes:
+            cls_name = self.elements_model.names[int(b.cls[0].item())].replace("AX", "").lower()
+            all_detected.append((cls_name, float(b.conf[0].item()), [int(v) for v in b.xyxy[0].tolist()]))
+
+        for b in grp_boxes:
+            cls_name = self.groups_model.names[int(b.cls[0].item())].replace("AX", "").lower()
+            all_detected.append((f"container/{cls_name}", float(b.conf[0].item()), [int(v) for v in b.xyxy[0].tolist()]))
+
         elements = []
         covered_ocr = set()
 
-        for i, box in enumerate(boxes):
-            cls_id = int(box.cls[0].item())
-            role_raw = self.classes.get(cls_id, "AXElement")
-            role = role_raw.replace("AX", "").lower()
-            conf = float(box.conf[0].item())
-            
-            bx0, by0, bx1, by1 = [int(v) for v in box.xyxy[0].tolist()]
-
+        for role_raw, conf, (bx0, by0, bx1, by1) in all_detected:
+            # Match OCR text overlapping this detected boundary
             matched_words = []
             for idx, (text, conf_ocr, (ox1, oy1, ox2, oy2)) in enumerate(ocr_res):
                 ix0, iy0 = max(bx0, ox1), max(by0, oy1)
                 ix1, iy1 = min(bx1, ox2), min(by1, oy2)
                 iw, ih = max(0, ix1 - ix0), max(0, iy1 - iy0)
-                intersection_area = iw * ih
+                area = iw * ih
                 text_area = max(1.0, (ox2 - ox1) * (oy2 - oy1))
-                if (intersection_area / text_area) > 0.35:
+                if (area / text_area) > 0.35:
                     matched_words.append(text.strip())
                     covered_ocr.add(idx)
+
+            label = " ".join(matched_words)
             logical_mid_x = int(((bx0 + bx1) / 2.0) / retina_factor)
             logical_mid_y = int(((by0 + by1) / 2.0) / retina_factor)
             app_name = resolve_app(logical_mid_x, logical_mid_y, windows)
+            role = role_raw
 
-            label = " ".join(matched_words) if matched_words else ""
-            if "http" in label or "www." in label or ".co" in label or ".com" in label or ".org" in label:
-                role = "addressbar"
+            if not label and "container" in role:
+                continue
 
             if not label and role == "textarea":
                 label = "input field"
 
-            if label or role in {"button", "link", "textarea", "addressbar", "disclosuretriangle"}:
+            if label or role in {"button", "link", "textarea"}:
                 element_id = str(len(elements) + 1)
                 elements.append({
                     "id": element_id,
@@ -121,7 +132,7 @@ class UISegmenter:
                     "confidence": conf
                 })
 
-        # Include standalone OCR elements not captured by YOLO (tagged with owning app)
+        # Standalone OCR text not captured by any model
         for idx, (text, conf_ocr, (ox1, oy1, ox2, oy2)) in enumerate(ocr_res):
             clean = text.strip()
             if idx not in covered_ocr and len(clean) > 1:
@@ -129,13 +140,11 @@ class UISegmenter:
                 logical_mid_y = int(((oy1 + oy2) / 2.0) / retina_factor)
                 app_name = resolve_app(logical_mid_x, logical_mid_y, windows)
                 
-                is_url = ("http" in clean or "www." in clean or ".co" in clean or ".com" in clean or ".org" in clean)
-                role = "addressbar" if is_url else "link"
                 element_id = str(len(elements) + 1)
                 elements.append({
                     "id": element_id,
                     "app": app_name,
-                    "role": role,
+                    "role": "text/link",
                     "label": clean,
                     "point": [logical_mid_x, logical_mid_y],
                     "raw_box": [int(ox1), int(oy1), int(ox2), int(oy2)],
