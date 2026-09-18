@@ -40,6 +40,12 @@
     "swift-dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/JevDispatcher.swiftdeps",
     "diagnostics": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/JevDispatcher.dia"
   },
+  "/Users/danielwalker/Developer/jev-orb/Sources/Driver/InputDriver.swift": {
+    "object": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/InputDriver.swift.o",
+    "swiftmodule": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/InputDriver~partial.swiftmodule",
+    "swift-dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/InputDriver.swiftdeps",
+    "diagnostics": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/InputDriver.dia"
+  },
   "/Users/danielwalker/Developer/jev-orb/Sources/Orb/OrbConfiguration.swift": {
     "object": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/OrbConfiguration.swift.o",
     "swiftmodule": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/OrbConfiguration~partial.swiftmodule",

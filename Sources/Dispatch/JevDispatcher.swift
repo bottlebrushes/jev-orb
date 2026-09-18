@@ -17,32 +17,80 @@ public final class JevDispatcher: @unchecked Sendable {
                 let process = Process()
                 process.executableURL = URL(fileURLWithPath: execPath)
                 process.arguments = [goal]
+
                 var env = ProcessInfo.processInfo.environment
                 let home = NSHomeDirectory()
                 env["HOME"] = home
                 env["PATH"] = "\(home)/.local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
                 process.environment = env
 
+                let outPipe = Pipe()
+                process.standardOutput = outPipe
+                process.standardError = outPipe
+
                 let logPath = "/tmp/jevorb.log"
                 if !FileManager.default.fileExists(atPath: logPath) {
                     FileManager.default.createFile(atPath: logPath, contents: nil)
                 }
-                if let logHandle = FileHandle(forWritingAtPath: logPath) {
-                    logHandle.seekToEndOfFile()
-                    process.standardOutput = logHandle
-                    process.standardError = logHandle
+
+                outPipe.fileHandleForReading.readabilityHandler = { handle in
+                    let data = handle.availableData
+                    guard !data.isEmpty else { return }
+
+                    // Log to /tmp/jevorb.log
+                    if let logHandle = FileHandle(forWritingAtPath: logPath) {
+                        logHandle.seekToEndOfFile()
+                        logHandle.write(data)
+                    }
+
+                    // Parse dispatch commands in real time
+                    if let str = String(data: data, encoding: .utf8) {
+                        for line in str.split(separator: "\n") {
+                            let trimmed = line.trimmingCharacters(in: .whitespaces)
+                            if trimmed.contains("DISPATCH: ") {
+                                let jsonStr = trimmed.components(separatedBy: "DISPATCH: ").last ?? ""
+                                if let jData = jsonStr.data(using: .utf8),
+                                   let obj = try? JSONSerialization.jsonObject(with: jData) as? [String: Any] {
+                                    self.executeNativeAction(obj)
+                                }
+                            }
+                        }
+                    }
                 }
 
                 do {
                     try process.run()
                     process.waitUntilExit()
 
+                    outPipe.fileHandleForReading.readabilityHandler = nil
                     let success = process.terminationStatus == 0
                     continuation.resume(returning: success)
                 } catch {
+                    outPipe.fileHandleForReading.readabilityHandler = nil
                     continuation.resume(throwing: error)
                 }
             }
+        }
+    }
+
+    private func executeNativeAction(_ obj: [String: Any]) {
+        let type = obj["type"] as? String ?? ""
+        let x = obj["x"] as? Int ?? 0
+        let y = obj["y"] as? Int ?? 0
+        let text = obj["text"] as? String ?? ""
+
+        NSLog("[JevDispatcher Native Execution] Executing action: %@ at (%d, %d)", type, x, y)
+
+        if type == "replace_text" {
+            InputDriver.shared.replaceTextAt(x: x, y: y, text: text)
+        } else if type == "click" {
+            InputDriver.shared.clickAt(x: x, y: y)
+        } else if type == "type_text" {
+            InputDriver.shared.clickAt(x: x, y: y)
+            usleep(50000)
+            InputDriver.shared.typeText(text)
+            usleep(50000)
+            InputDriver.shared.pressKey(keyCode: 36)
         }
     }
 }

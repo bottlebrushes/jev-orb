@@ -4,6 +4,7 @@
 /Users/danielwalker/Developer/jev-orb/Sources/Audio/AudioRecorder.swift
 /Users/danielwalker/Developer/jev-orb/Sources/Audio/ScreenCaptureHelper.swift
 /Users/danielwalker/Developer/jev-orb/Sources/Dispatch/JevDispatcher.swift
+/Users/danielwalker/Developer/jev-orb/Sources/Driver/InputDriver.swift
 /Users/danielwalker/Developer/jev-orb/Sources/Orb/OrbConfiguration.swift
 /Users/danielwalker/Developer/jev-orb/Sources/Orb/OrbView.swift
 /Users/danielwalker/Developer/jev-orb/Sources/Orb/ParticlesView.swift

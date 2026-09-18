@@ -173,6 +173,7 @@ def run_visual_task(goal: str):
         x, y = target["point"]
         if op == "CLICK":
             print(f"  Action: CLICK {target['role']} \"{target['label']}\" at screen coordinates ({x}, {y})")
+            print(f"DISPATCH: {json.dumps({'type': 'click', 'x': x, 'y': y})}", flush=True)
             click_at(x, y)
             history.append({"action": "CLICK", "target": target["label"]})
             time.sleep(1.2)  # allow page transition / click response
@@ -180,15 +181,16 @@ def run_visual_task(goal: str):
             text = generate_text(goal, target["label"])
             print(f"  Action: TYPE_TEXT \"{text}\" into {target['role']} \"{target['label']}\" at ({x}, {y})")
             if target["role"] == "addressbar":
+                print(f"DISPATCH: {json.dumps({'type': 'replace_text', 'x': x, 'y': y, 'text': text})}", flush=True)
                 replace_text_at(x, y, text)
             else:
+                print(f"DISPATCH: {json.dumps({'type': 'type_text', 'x': x, 'y': y, 'text': text})}", flush=True)
                 click_at(x, y)
                 time.sleep(0.1)
                 type_text(text)
                 press_key("return")
             history.append({"action": "TYPE_TEXT", "target": target["label"], "text": text})
-            time.sleep(1.2)  # allow page transition / search submit
-
+            time.sleep(1.2)  # allow search submit
     print("[Jev Vision] Step budget reached.")
     return False
 

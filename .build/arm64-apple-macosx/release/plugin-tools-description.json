@@ -48,6 +48,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/Sources/Driver/InputDriver.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/danielwalker/Developer/jev-orb/Sources/Orb/OrbConfiguration.swift"
         },
         {
@@ -93,6 +97,7 @@
         "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/AudioRecorder.swift.o",
         "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/ScreenCaptureHelper.swift.o",
         "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/JevDispatcher.swift.o",
+        "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/InputDriver.swift.o",
         "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/OrbConfiguration.swift.o",
         "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/OrbView.swift.o",
         "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/ParticlesView.swift.o",
@@ -181,6 +186,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/InputDriver.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/OrbConfiguration.swift.o"
         },
         {
@@ -220,6 +229,7 @@
         "/Users/danielwalker/Developer/jev-orb/Sources/Audio/AudioRecorder.swift",
         "/Users/danielwalker/Developer/jev-orb/Sources/Audio/ScreenCaptureHelper.swift",
         "/Users/danielwalker/Developer/jev-orb/Sources/Dispatch/JevDispatcher.swift",
+        "/Users/danielwalker/Developer/jev-orb/Sources/Driver/InputDriver.swift",
         "/Users/danielwalker/Developer/jev-orb/Sources/Orb/OrbConfiguration.swift",
         "/Users/danielwalker/Developer/jev-orb/Sources/Orb/OrbView.swift",
         "/Users/danielwalker/Developer/jev-orb/Sources/Orb/ParticlesView.swift",
@@ -249,6 +259,7 @@
       "/Users/danielwalker/Developer/jev-orb/Sources/Audio/AudioRecorder.swift",
       "/Users/danielwalker/Developer/jev-orb/Sources/Audio/ScreenCaptureHelper.swift",
       "/Users/danielwalker/Developer/jev-orb/Sources/Dispatch/JevDispatcher.swift",
+      "/Users/danielwalker/Developer/jev-orb/Sources/Driver/InputDriver.swift",
       "/Users/danielwalker/Developer/jev-orb/Sources/Orb/OrbConfiguration.swift",
       "/Users/danielwalker/Developer/jev-orb/Sources/Orb/OrbView.swift",
       "/Users/danielwalker/Developer/jev-orb/Sources/Orb/ParticlesView.swift",
@@ -362,6 +373,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/Sources/Driver/InputDriver.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/danielwalker/Developer/jev-orb/Sources/Orb/OrbConfiguration.swift"
         },
         {
@@ -409,6 +424,10 @@
         {
           "kind" : "file",
           "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/FloatingPanel.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/InputDriver.swift.o"
         },
         {
           "kind" : "file",
