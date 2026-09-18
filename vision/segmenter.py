@@ -54,17 +54,10 @@ class UISegmenter:
         self.elements_model = YOLO(elements_path)
         self.groups_model = YOLO(groups_path)
 
-    def capture_screen(self, output_path: str = "/tmp/jev_screen.png") -> str:
-        """Capture the current screen if not already provided."""
-        if not os.path.exists(output_path) or (time.time() - os.path.getmtime(output_path) > 2.0):
-            subprocess.run(["screencapture", "-x", output_path], check=True)
-        return output_path
-
     def analyze(self, image_path: str = "/tmp/jev_screen.png") -> dict:
-        """Runs dual YOLO detection + Apple Vision OCR and fuses all elements."""
+        """Runs dual YOLO detection + Apple Vision OCR on the captured screen."""
         if not os.path.exists(image_path):
-            image_path = self.capture_screen(image_path)
-
+            return {"image_path": image_path, "width": 0, "height": 0, "yolo_ms": 0, "ocr_ms": 0, "elements": []}
         img = Image.open(image_path)
         width, height = img.size
         retina_factor = 2.0 if width > 2000 else 1.0

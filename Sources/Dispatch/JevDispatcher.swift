@@ -80,11 +80,16 @@ public final class JevDispatcher: @unchecked Sendable {
         let text = obj["text"] as? String ?? ""
 
         NSLog("[JevDispatcher Native Execution] Executing action: %@ at (%d, %d)", type, x, y)
-
         if type == "replace_text" || type == "type_text" {
             InputDriver.shared.replaceTextAt(x: x, y: y, text: text)
         } else if type == "click" {
             InputDriver.shared.clickAt(x: x, y: y)
+        }
+
+        // Wait 700ms for browser transition then refresh screen capture in Swift
+        usleep(700000)
+        Task {
+            _ = try? await ScreenCaptureHelper.shared.captureVisibleScreen(outputPath: "/tmp/jev_screen.png")
         }
     }
 }
