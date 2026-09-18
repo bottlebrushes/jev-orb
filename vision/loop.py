@@ -36,8 +36,10 @@ def query_jev(elements: list, goal: str, history: list) -> tuple:
     """Asks typesafe/jev-1.13 to select operation and target from the visual action space."""
     targets = {}
     for el in elements:
+        app_tag = f"[{el.get('app', 'App')}]"
         targets[el["id"]] = {
-            "element": f"[{el['id']}] {el['role']} \"{el['label']}\"",
+            "element": f"[{el['id']}] {app_tag} {el['role']} \"{el['label']}\" at {el['point']}",
+            "app": el.get("app", "App"),
             "role": el["role"],
             "coordinates": el["point"]
         }
@@ -49,28 +51,30 @@ def query_jev(elements: list, goal: str, history: list) -> tuple:
         "BLOCKED": "No supported operation can progress."
     }
 
+    app_rule = "Each element is tagged with its owning application, e.g. [Microsoft Edge], [Ghostty], [Firefox]. Always select the control belonging to the application relevant to the goal. For browser tasks, choose controls tagged with the browser application."
+
     questions = {
         "operation": {
             "type": "choice",
             "criteria": operations,
-            "instructions": {"goal": goal, "rule": "To navigate to a new site, select TYPE_TEXT on the browser address bar."}
+            "instructions": {"goal": goal, "rule": app_rule}
         },
         "click_target": {
             "type": "choice",
             "criteria": targets,
-            "instructions": {"goal": goal, "operation": "CLICK"}
+            "instructions": {"goal": goal, "operation": "CLICK", "rule": app_rule}
         },
         "type_text_target": {
             "type": "choice",
             "criteria": targets,
-            "instructions": {"goal": goal, "operation": "TYPE_TEXT"}
+            "instructions": {"goal": goal, "operation": "TYPE_TEXT", "rule": app_rule}
         }
     }
 
     payload = {
         "model": "typesafe/jev-1.13",
         "state": {
-            "elements": [{"index": el["id"], "role": el["role"], "label": el["label"]} for el in elements],
+            "elements": [{"index": el["id"], "app": el.get("app", "App"), "role": el["role"], "label": el["label"]} for el in elements],
             "recent_actions": history[-6:]
         },
         "questions": questions
