@@ -1,0 +1,67 @@
+feature:
+    name: jev-orb
+    product: jev-orb
+    version: 1.0.0
+    description: |
+        JevOrb is a lightweight, native macOS push-to-talk voice orb application that
+        drives web browsers using Jev Ultrafast and local Metal Whisper STT.
+        It isolates Accessibility and Screen Recording permissions into an independent .app bundle.
+
+components:
+    OVERLAY:
+        description: Floating non-activating transparent window panel
+        requirements:
+            1: Window is an NSPanel configured with .nonactivatingPanel so it never steals focus from the active browser
+            2: Window level is set to .floating to remain visible above all desktop applications
+            3: Window has a completely transparent background (.clear) and no window chrome or shadow
+            4: Window is centered on the active display and sizes to fit the glowing orb canvas (260x260 pt)
+            5: Window shows immediately on hotkey press and fades out upon completion
+
+    ORB:
+        description: Siri-style glowing animated visualizer based on metasidd/Orb
+        requirements:
+            1: Renders a multi-layer organic glowing orb with rotating depth glows, wavy blobs, core glow, and particles
+            2: Supports IDLE state: dormant subtle breathing pulse
+            3: Supports LISTENING state: active multi-color bloom with live audio reactivity
+            4: Real-time audio reactive: microphone RMS input levels dynamically scale core glow intensity and rotation speed
+            5: Supports THINKING state: rapid cosmic swirling animation while Jev and text models evaluate actions
+            6: Supports SUCCESS state: transitions gradient to emerald green, pulses once, and fades to dismiss
+
+    HOTKEY:
+        description: Push-to-talk activation mechanism
+        requirements:
+            1: Monitors global keyboard events without requiring the app to be focused
+            2: Key-down initiates audio capture and transitions orb to LISTENING
+            3: Key-up terminates audio capture and transitions orb to THINKING
+            4: Default trigger is hold-to-talk on Right Option or double-tap Option
+
+    AUDIO:
+        description: Low-latency microphone capture and audio level metering
+        requirements:
+            1: Uses AVAudioEngine to stream microphone input buffer in real time
+            2: Computes RMS audio power on every audio buffer tap to drive visual reactivity (0.0 to 1.0)
+            3: Encodes the recorded speech into a 16kHz mono 16-bit PCM WAV buffer upon key-up
+            4: Completely tears down audio engine and mic session after capture
+
+    WHISPER:
+        description: Local Metal-accelerated speech-to-text integration
+        requirements:
+            1: Posts 16kHz WAV payload to local Whisper server endpoint (default: http://127.0.0.1:49868/inference)
+            2: Transcribes speech with sub-500ms latency on Apple Silicon Metal
+            3: Extracts clean transcribed goal text from server response
+            4: Fails gracefully if whisper server is unreachable and transitions orb to error state
+
+    DISPATCH:
+        description: Autonomous browser execution via Jev Ultrafast
+        requirements:
+            1: Spawns or calls Jev Ultrafast agent with the transcribed goal
+            2: Targets the user's currently running browser (Edge, Firefox, Chrome, Safari)
+            3: Relies on typesafe/jev-1.13 and openai/gpt-oss-120b:nitro via OpenRouter
+            4: Signals completion back to the orb UI when Jev reaches STATUS: DONE
+
+constraints:
+    UX:
+        requirements:
+            1: Silent completion: zero voice or TTS speech is produced upon finishing the task
+            2: Low latency: total visual response time from key-release to thinking state is under 50ms
+            3: Permission isolation: all macOS Accessibility, Screen Recording, and Mic permissions belong solely to JevOrb.app
