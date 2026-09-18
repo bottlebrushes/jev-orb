@@ -89,12 +89,13 @@ class UISegmenter:
             bx0, by0, bx1, by1 = [int(v) for v in box.xyxy[0].tolist()]
 
             matched_words = []
-            for idx, (text, conf_ocr, (ox, oy, ow, oh)) in enumerate(ocr_res):
-                ix0, iy0 = max(bx0, ox), max(by0, oy)
-                ix1, iy1 = min(bx1, ox + ow), min(by1, oy + oh)
+            for idx, (text, conf_ocr, (ox1, oy1, ox2, oy2)) in enumerate(ocr_res):
+                ix0, iy0 = max(bx0, ox1), max(by0, oy1)
+                ix1, iy1 = min(bx1, ox2), min(by1, oy2)
                 iw, ih = max(0, ix1 - ix0), max(0, iy1 - iy0)
-                area = iw * ih
-                if (ow * oh) > 0 and (area / float(ow * oh)) > 0.4:
+                intersection_area = iw * ih
+                text_area = max(1.0, (ox2 - ox1) * (oy2 - oy1))
+                if (intersection_area / text_area) > 0.35:
                     matched_words.append(text.strip())
                     covered_ocr.add(idx)
             logical_mid_x = int(((bx0 + bx1) / 2.0) / retina_factor)
@@ -121,11 +122,11 @@ class UISegmenter:
                 })
 
         # Include standalone OCR elements not captured by YOLO (tagged with owning app)
-        for idx, (text, conf_ocr, (ox, oy, ow, oh)) in enumerate(ocr_res):
+        for idx, (text, conf_ocr, (ox1, oy1, ox2, oy2)) in enumerate(ocr_res):
             clean = text.strip()
             if idx not in covered_ocr and len(clean) > 1:
-                logical_mid_x = int((ox + ow / 2.0) / retina_factor)
-                logical_mid_y = int((oy + oh / 2.0) / retina_factor)
+                logical_mid_x = int(((ox1 + ox2) / 2.0) / retina_factor)
+                logical_mid_y = int(((oy1 + oy2) / 2.0) / retina_factor)
                 app_name = resolve_app(logical_mid_x, logical_mid_y, windows)
                 
                 is_url = ("http" in clean or "www." in clean or ".co" in clean or ".com" in clean or ".org" in clean)
@@ -137,7 +138,7 @@ class UISegmenter:
                     "role": role,
                     "label": clean,
                     "point": [logical_mid_x, logical_mid_y],
-                    "raw_box": [int(ox), int(oy), int(ox + ow), int(oy + oh)],
+                    "raw_box": [int(ox1), int(oy1), int(ox2), int(oy2)],
                     "confidence": float(conf_ocr)
                 })
 
