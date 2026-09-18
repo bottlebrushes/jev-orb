@@ -46,33 +46,31 @@ def query_jev(elements: list, goal: str, history: list) -> tuple:
 
     operations = {
         "CLICK": "Click an element, button, menu option, tab, or link.",
-        "TYPE_TEXT": "Enter text into an editable field, search input, or browser address bar to navigate.",
+        "TYPE_TEXT": "Enter text into an editable field, search input, or address bar.",
         "DONE": "Every requirement is visibly satisfied.",
         "BLOCKED": "No supported operation can progress."
     }
 
-    app_rule = (
-        "Each element is tagged with its owning application, e.g. [Microsoft Edge], [Ghostty], [Firefox]. Always select the control belonging to the application relevant to the goal.\n"
-        "RULES:\n"
-        "1. If the browser address bar or active page already visibly displays the requested destination (e.g. Google), select DONE immediately.\n"
-        "2. Do not click '+' or New Tab buttons unless explicitly asked to open a new tab. Always navigate within the existing active tab.\n"
-        "3. To navigate to a new site, select TYPE_TEXT on the browser address bar."
-    )
+    instructions = {
+        "goal": goal,
+        "context": "Elements are tagged with their owning application (e.g. [Microsoft Edge], [Ghostty]). Choose the element belonging to the application relevant to the goal."
+    }
+
     questions = {
         "operation": {
             "type": "choice",
             "criteria": operations,
-            "instructions": {"goal": goal, "rule": app_rule}
+            "instructions": instructions
         },
         "click_target": {
             "type": "choice",
             "criteria": targets,
-            "instructions": {"goal": goal, "operation": "CLICK", "rule": app_rule}
+            "instructions": {**instructions, "operation": "CLICK"}
         },
         "type_text_target": {
             "type": "choice",
             "criteria": targets,
-            "instructions": {"goal": goal, "operation": "TYPE_TEXT", "rule": app_rule}
+            "instructions": {**instructions, "operation": "TYPE_TEXT"}
         }
     }
 
