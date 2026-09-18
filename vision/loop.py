@@ -123,10 +123,54 @@ def generate_text(goal: str, field_label: str) -> str:
             pass
     return goal
 
+def detect_target_url(goal: str) -> str:
+    """Extracts target URL if goal is or begins with a navigation request."""
+    g_lower = goal.lower().strip()
+    if "http://" in g_lower or "https://" in g_lower:
+        for word in goal.split():
+            if word.startswith("http://") or word.startswith("https://"):
+                return word
+    if "google.com" in g_lower or "go to google" in g_lower or "open google" in g_lower:
+        return "https://www.google.com"
+    if "youtube.com" in g_lower or ("youtube" in g_lower and any(w in g_lower for w in ["open", "go to"])):
+        return "https://www.youtube.com"
+    if "wikipedia.org" in g_lower or ("wikipedia" in g_lower and any(w in g_lower for w in ["open", "go to"])):
+        return "https://www.wikipedia.org"
+    if "reddit.com" in g_lower or ("reddit" in g_lower and any(w in g_lower for w in ["open", "go to"])):
+        return "https://www.reddit.com"
+    if "github.com" in g_lower or ("github" in g_lower and any(w in g_lower for w in ["open", "go to"])):
+        return "https://www.github.com"
+    if "hacker news" in g_lower or "ycombinator" in g_lower:
+        return "https://news.ycombinator.com"
+    return None
+
 def run_visual_task(goal: str):
     print("=" * 60)
     print(f"[Jev Vision] Starting Goal: {goal}")
     print("=" * 60)
+
+    # 1. Handle navigation intent if goal requests opening a website
+    target_url = detect_target_url(goal)
+    if target_url:
+        print(f"[Jev Vision] Navigating browser to: {target_url}")
+        try:
+            from browser_harness.admin import ensure_daemon
+            from browser_harness.helpers import cdp
+            ensure_daemon()
+            cdp("Page.navigate", url=target_url)
+            time.sleep(1.2)
+        except Exception as e:
+            print(f"[Jev Vision] CDP navigate error: {e}")
+
+        # If the goal was purely a navigation command, we are done
+        g_clean = goal.lower().strip()
+        nav_keywords = ["go to", "open", "navigate to", "can you go to", "please go to"]
+        is_pure_nav = any(g_clean == f"{kw} google" or g_clean == f"{kw} youtube" or g_clean == f"{kw} wikipedia" or g_clean == f"{kw} reddit" or g_clean == f"{kw} github" for kw in nav_keywords) or g_clean in {"go to google", "open google", "can you go to google?", "google.com", "can you open google?"}
+        if is_pure_nav:
+            print("\n" + "=" * 60)
+            print("[Jev Vision] STATUS: DONE - Navigated to requested site!")
+            print("=" * 60)
+            return True
 
     segmenter = UISegmenter()
     history = []
