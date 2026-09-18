@@ -61,15 +61,17 @@ class UISegmenter:
                 if not (ox + ow < bx0 - 5 or ox > bx1 + 5 or oy + oh < by0 - 5 or oy > by1 + 5):
                     matched_words.append(text.strip())
                     covered_ocr.add(idx)
-
+            logical_mid_x = int(((bx0 + bx1) / 2.0) / retina_factor)
+            logical_mid_y = int(((by0 + by1) / 2.0) / retina_factor)
             label = " ".join(matched_words) if matched_words else ""
+            has_code = any(c in label for c in ["{", "}", "[", "]", "at (", '"', "'"])
+            is_url = logical_mid_y < 140 and any(u in label.lower() for u in ["http", "www.", ".co", ".org", ".com"]) and not has_code
+            if is_url:
+                role = "addressbar"
             if not label and role == "textarea":
                 label = "search/text input"
 
-            logical_mid_x = int(((bx0 + bx1) / 2.0) / retina_factor)
-            logical_mid_y = int(((by0 + by1) / 2.0) / retina_factor)
-
-            if label or role in {"button", "link", "textarea", "disclosuretriangle"}:
+            if label or role in {"button", "link", "textarea", "addressbar", "disclosuretriangle"}:
                 element_id = str(len(elements) + 1)
                 elements.append({
                     "id": element_id,
@@ -84,11 +86,12 @@ class UISegmenter:
         for idx, (text, conf_ocr, (ox, oy, ow, oh)) in enumerate(ocr_res):
             clean = text.strip()
             if idx not in covered_ocr and len(clean) > 1:
-                is_url = "http" in clean or "www." in clean or ".co" in clean or ".org" in clean or ".com" in clean
-                role = "addressbar" if is_url else "link"
-                element_id = str(len(elements) + 1)
                 logical_mid_x = int((ox + ow / 2.0) / retina_factor)
                 logical_mid_y = int((oy + oh / 2.0) / retina_factor)
+                has_code = any(c in clean for c in ["{", "}", "[", "]", "at (", '"', "'"])
+                is_url = logical_mid_y < 140 and any(u in clean.lower() for u in ["http", "www.", ".co", ".org", ".com"]) and not has_code
+                role = "addressbar" if is_url else "link"
+                element_id = str(len(elements) + 1)
                 elements.append({
                     "id": element_id,
                     "role": role,
