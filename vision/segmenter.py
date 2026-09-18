@@ -90,18 +90,20 @@ class UISegmenter:
 
             matched_words = []
             for idx, (text, conf_ocr, (ox, oy, ow, oh)) in enumerate(ocr_res):
-                if not (ox + ow < bx0 - 5 or ox > bx1 + 5 or oy + oh < by0 - 5 or oy > by1 + 5):
+                ix0, iy0 = max(bx0, ox), max(by0, oy)
+                ix1, iy1 = min(bx1, ox + ow), min(by1, oy + oh)
+                iw, ih = max(0, ix1 - ix0), max(0, iy1 - iy0)
+                area = iw * ih
+                if (ow * oh) > 0 and (area / float(ow * oh)) > 0.4:
                     matched_words.append(text.strip())
                     covered_ocr.add(idx)
-
             logical_mid_x = int(((bx0 + bx1) / 2.0) / retina_factor)
             logical_mid_y = int(((by0 + by1) / 2.0) / retina_factor)
             app_name = resolve_app(logical_mid_x, logical_mid_y, windows)
 
             label = " ".join(matched_words) if matched_words else ""
-            if "http" in label or "www." in label or ".co" in label or ".com" in label:
-                if "browser" in app_name.lower() or "edge" in app_name.lower() or "firefox" in app_name.lower() or "chrome" in app_name.lower() or "safari" in app_name.lower():
-                    role = "addressbar"
+            if "http" in label or "www." in label or ".co" in label or ".com" in label or ".org" in label:
+                role = "addressbar"
 
             if not label and role == "textarea":
                 label = "input field"
@@ -126,8 +128,8 @@ class UISegmenter:
                 logical_mid_y = int((oy + oh / 2.0) / retina_factor)
                 app_name = resolve_app(logical_mid_x, logical_mid_y, windows)
                 
-                is_url = ("http" in clean or "www." in clean or ".co" in clean or ".com" in clean)
-                role = "addressbar" if (is_url and ("browser" in app_name.lower() or "edge" in app_name.lower() or "firefox" in app_name.lower() or "chrome" in app_name.lower())) else "link"
+                is_url = ("http" in clean or "www." in clean or ".co" in clean or ".com" in clean or ".org" in clean)
+                role = "addressbar" if is_url else "link"
                 element_id = str(len(elements) + 1)
                 elements.append({
                     "id": element_id,
