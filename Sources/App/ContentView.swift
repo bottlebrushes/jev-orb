@@ -176,11 +176,16 @@ public struct ContentView: View {
                 await MainActor.run {
                     self.transcribedText = goal
                 }
+                do {
+                    let screenPath = try await ScreenCaptureHelper.shared.captureVisibleScreen(outputPath: "/tmp/jev_screen.png")
+                    logMessage("Captured visible screen to \(screenPath)")
+                } catch {
+                    logMessage("Screen capture warning: \(error.localizedDescription)")
+                }
 
-                logMessage("Dispatching to Jev: \"\(goal)\"...")
+                logMessage("Dispatching to Jev Vision: \"\(goal)\"...")
                 let success = try await dispatcher.dispatch(goal: goal)
                 logMessage("Jev execution returned success=\(success)")
-
                 await MainActor.run {
                     if success {
                         orbState = .success

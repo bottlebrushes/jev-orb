@@ -12,6 +12,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true]
         let isTrusted = AXIsProcessTrustedWithOptions(options)
         NSLog("[JevOrb] Accessibility isTrusted: %@", isTrusted ? "YES" : "NO")
+
+        // Prompt for Screen Recording permission if needed
+        let hasScreenRecording = ScreenCaptureHelper.shared.requestPermissionsIfNeeded()
+        NSLog("[JevOrb] Screen Recording hasPermission: %@", hasScreenRecording ? "YES" : "NO")
         let contentView = ContentView()
         let hostingView = NSHostingView(rootView: contentView)
 

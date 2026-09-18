@@ -18,53 +18,29 @@ class UISegmenter:
         model_path = hf_hub_download(repo_id=MODEL_REPO, filename=MODEL_FILE)
         self.model = YOLO(model_path)
         self.classes = self.model.names
-    def capture_screen(self, output_path: str = "/tmp/jev_screen.png") -> str:
-        """Capture active page via CDP if available, otherwise fall back to screencapture."""
-        import urllib.request
-        import base64
-        try:
-            req = urllib.request.urlopen("http://127.0.0.1:9222/json/version", timeout=0.5)
-            if req.status == 200:
-                os.environ.setdefault("BU_CDP_URL", "http://127.0.0.1:9222")
-                from browser_harness.admin import ensure_daemon
-                from browser_harness.helpers import cdp
-                ensure_daemon()
-                data = cdp("Page.captureScreenshot")
-                Path(output_path).write_bytes(base64.b64decode(data["data"]))
-                return output_path
-        except Exception as e:
-            pass
 
-        subprocess.run(["screencapture", "-x", output_path], check=True)
+    def capture_screen(self, output_path: str = "/tmp/jev_screen.png") -> str:
+        """Capture the current screen if not already provided."""
+        if not os.path.exists(output_path) or (time.time() - os.path.getmtime(output_path) > 2.0):
+            subprocess.run(["screencapture", "-x", output_path], check=True)
         return output_path
 
-    def analyze(self, image_path: str = None) -> dict:
-        """Runs YOLO UI detection + Apple Vision OCR and fuses them into an indexed action space."""
-        if not image_path:
-            image_path = self.capture_screen()
+    def analyze(self, image_path: str = "/tmp/jev_screen.png") -> dict:
+        """Runs YOLO UI detection + Apple Vision OCR on the captured screen."""
+        if not os.path.exists(image_path):
+            image_path = self.capture_screen(image_path)
 
         img = Image.open(image_path)
         width, height = img.size
 
-        scale_x = 1.0
-        scale_y = 1.0
-        try:
-            from browser_harness.helpers import cdp
-            layout = cdp("Page.getLayoutMetrics")
-            vw = layout.get("cssVisualViewport", {}).get("clientWidth") or layout.get("cssLayoutViewport", {}).get("clientWidth")
-            vh = layout.get("cssVisualViewport", {}).get("clientHeight") or layout.get("cssLayoutViewport", {}).get("clientHeight")
-            if vw and vh:
-                scale_x = width / float(vw)
-                scale_y = height / float(vh)
-        except Exception:
-            scale_x = 2.0 if width > 1500 else 1.0
-            scale_y = 2.0 if height > 1000 else 1.0
+        # Retina scale detection (macOS Retina displays are 2x logical points)
+        retina_factor = 2.0 if width > 2000 else 1.0
+
         t0 = time.perf_counter()
         yolo_res = self.model(img, verbose=False)[0]
         t_yolo = time.perf_counter() - t0
 
         t0 = time.perf_counter()
-        # ocrmac runs native macOS Apple Vision VNRecognizeTextRequest
         ocr_res = ocrmac.OCR(img, language_preference=['en-US']).recognize(px=True)
         t_ocr = time.perf_counter() - t0
 
@@ -77,24 +53,21 @@ class UISegmenter:
             role = role_raw.replace("AX", "").lower()
             conf = float(box.conf[0].item())
             
-            # Pixel bounding box in image coordinates [x0, y0, x1, y1]
             bx0, by0, bx1, by1 = [int(v) for v in box.xyxy[0].tolist()]
 
-            # Find all OCR texts that fall within or intersect this bounding box
             matched_words = []
             for text, conf_ocr, (ox, oy, ow, oh) in ocr_res:
-                # check overlap
                 if not (ox + ow < bx0 - 5 or ox > bx1 + 5 or oy + oh < by0 - 5 or oy > by1 + 5):
                     matched_words.append(text.strip())
 
             label = " ".join(matched_words) if matched_words else ""
             if not label and role == "textarea":
-                label = "input field"
+                label = "search/text input"
 
-            # Logical screen coordinates for click dispatch
-            logical_mid_x = int(((bx0 + bx1) / 2.0) / scale_x)
-            logical_mid_y = int(((by0 + by1) / 2.0) / scale_y)
-            # Only include elements with valid labels or interactive roles
+            # Convert retina image pixels to logical screen coordinates for Quartz mouse clicks
+            logical_mid_x = int(((bx0 + bx1) / 2.0) / retina_factor)
+            logical_mid_y = int(((by0 + by1) / 2.0) / retina_factor)
+
             if label or role in {"button", "link", "textarea", "disclosuretriangle"}:
                 element_id = str(len(elements) + 1)
                 elements.append({
