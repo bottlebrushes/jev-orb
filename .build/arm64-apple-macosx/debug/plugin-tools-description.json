@@ -1,0 +1,472 @@
+{
+  "builtTestProducts" : [
+
+  ],
+  "copyCommands" : {
+
+  },
+  "explicitTargetDependencyImportCheckingMode" : {
+    "none" : {
+
+    }
+  },
+  "generatedSourceTargetSet" : [
+
+  ],
+  "pluginDescriptions" : [
+
+  ],
+  "swiftCommands" : {
+    "C.JevOrb-arm64-apple-macosx15.0-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/sources",
+      "importPath" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/Sources/App/ContentView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/Sources/App/FloatingPanel.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/Sources/App/main.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/Sources/Audio/AudioRecorder.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/Sources/Dispatch/JevDispatcher.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/Sources/Orb/OrbConfiguration.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/Sources/Orb/OrbView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/Sources/Orb/ParticlesView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/Sources/Orb/RealisticShadows.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/Sources/Orb/RotatingGlowView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/Sources/Orb/WavyBlobView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/Sources/Whisper/WhisperClient.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/sources"
+        }
+      ],
+      "isLibrary" : false,
+      "moduleName" : "JevOrb",
+      "moduleOutputPath" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/Modules/JevOrb.swiftmodule",
+      "objects" : [
+        "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/ContentView.swift.o",
+        "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/FloatingPanel.swift.o",
+        "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/main.swift.o",
+        "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/AudioRecorder.swift.o",
+        "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/JevDispatcher.swift.o",
+        "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/OrbConfiguration.swift.o",
+        "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/OrbView.swift.o",
+        "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/ParticlesView.swift.o",
+        "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/RealisticShadows.swift.o",
+        "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/RotatingGlowView.swift.o",
+        "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/WavyBlobView.swift.o",
+        "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/WhisperClient.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx14.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j8",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-Xfrontend",
+        "-entry-point-function-name",
+        "-Xfrontend",
+        "JevOrb_main",
+        "-swift-version",
+        "5",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "jev_orb"
+      ],
+      "outputFileMapPath" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/ContentView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/FloatingPanel.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/main.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/AudioRecorder.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/JevDispatcher.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/OrbConfiguration.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/OrbView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/ParticlesView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/RealisticShadows.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/RotatingGlowView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/WavyBlobView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/WhisperClient.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/Modules/JevOrb.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/danielwalker/Developer/jev-orb/Sources/App/ContentView.swift",
+        "/Users/danielwalker/Developer/jev-orb/Sources/App/FloatingPanel.swift",
+        "/Users/danielwalker/Developer/jev-orb/Sources/App/main.swift",
+        "/Users/danielwalker/Developer/jev-orb/Sources/Audio/AudioRecorder.swift",
+        "/Users/danielwalker/Developer/jev-orb/Sources/Dispatch/JevDispatcher.swift",
+        "/Users/danielwalker/Developer/jev-orb/Sources/Orb/OrbConfiguration.swift",
+        "/Users/danielwalker/Developer/jev-orb/Sources/Orb/OrbView.swift",
+        "/Users/danielwalker/Developer/jev-orb/Sources/Orb/ParticlesView.swift",
+        "/Users/danielwalker/Developer/jev-orb/Sources/Orb/RealisticShadows.swift",
+        "/Users/danielwalker/Developer/jev-orb/Sources/Orb/RotatingGlowView.swift",
+        "/Users/danielwalker/Developer/jev-orb/Sources/Orb/WavyBlobView.swift",
+        "/Users/danielwalker/Developer/jev-orb/Sources/Whisper/WhisperClient.swift"
+      ],
+      "tempsPath" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build",
+      "wholeModuleOptimization" : false
+    }
+  },
+  "swiftFrontendCommands" : {
+
+  },
+  "swiftTargetScanArgs" : {
+    "JevOrb" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "JevOrb",
+      "-package-name",
+      "jev_orb",
+      "-c",
+      "/Users/danielwalker/Developer/jev-orb/Sources/App/ContentView.swift",
+      "/Users/danielwalker/Developer/jev-orb/Sources/App/FloatingPanel.swift",
+      "/Users/danielwalker/Developer/jev-orb/Sources/App/main.swift",
+      "/Users/danielwalker/Developer/jev-orb/Sources/Audio/AudioRecorder.swift",
+      "/Users/danielwalker/Developer/jev-orb/Sources/Dispatch/JevDispatcher.swift",
+      "/Users/danielwalker/Developer/jev-orb/Sources/Orb/OrbConfiguration.swift",
+      "/Users/danielwalker/Developer/jev-orb/Sources/Orb/OrbView.swift",
+      "/Users/danielwalker/Developer/jev-orb/Sources/Orb/ParticlesView.swift",
+      "/Users/danielwalker/Developer/jev-orb/Sources/Orb/RealisticShadows.swift",
+      "/Users/danielwalker/Developer/jev-orb/Sources/Orb/RotatingGlowView.swift",
+      "/Users/danielwalker/Developer/jev-orb/Sources/Orb/WavyBlobView.swift",
+      "/Users/danielwalker/Developer/jev-orb/Sources/Whisper/WhisperClient.swift",
+      "-I",
+      "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx14.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j8",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-Xfrontend",
+      "-entry-point-function-name",
+      "-Xfrontend",
+      "JevOrb_main",
+      "-swift-version",
+      "5",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "jev_orb",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ]
+  },
+  "targetDependencyMap" : {
+    "JevOrb" : [
+
+    ]
+  },
+  "testDiscoveryCommands" : {
+
+  },
+  "testEntryPointCommands" : {
+
+  },
+  "traitConfiguration" : {
+    "default" : {
+
+    }
+  },
+  "writeCommands" : {
+    "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb-entitlement.plist" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<entitlement-plist>"
+        },
+        {
+          "kind" : "virtual",
+          "name" : "<com.apple.security.get-task-allow>"
+        }
+      ],
+      "outputFilePath" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb-entitlement.plist"
+    },
+    "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/Sources/App/ContentView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/Sources/App/FloatingPanel.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/Sources/App/main.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/Sources/Audio/AudioRecorder.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/Sources/Dispatch/JevDispatcher.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/Sources/Orb/OrbConfiguration.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/Sources/Orb/OrbView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/Sources/Orb/ParticlesView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/Sources/Orb/RealisticShadows.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/Sources/Orb/RotatingGlowView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/Sources/Orb/WavyBlobView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/Sources/Whisper/WhisperClient.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/sources"
+    },
+    "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.product/Objects.LinkFileList" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<link-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/AudioRecorder.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/ContentView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/FloatingPanel.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/JevDispatcher.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/OrbConfiguration.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/OrbView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/ParticlesView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/RealisticShadows.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/RotatingGlowView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/WavyBlobView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/WhisperClient.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/main.swift.o"
+        }
+      ],
+      "outputFilePath" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.product/Objects.LinkFileList"
+    },
+    "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt" : {
+      "alwaysOutOfDate" : true,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<swift-get-version>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+        }
+      ],
+      "outputFilePath" : "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+    }
+  }
+}

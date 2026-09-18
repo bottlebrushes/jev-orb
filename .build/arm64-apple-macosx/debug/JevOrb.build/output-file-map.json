@@ -1,0 +1,89 @@
+{
+  "": {
+    "swift-dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/master.swiftdeps"
+  },
+  "/Users/danielwalker/Developer/jev-orb/Sources/App/ContentView.swift": {
+    "dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/ContentView.d",
+    "object": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/ContentView.swift.o",
+    "swiftmodule": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/ContentView~partial.swiftmodule",
+    "swift-dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/ContentView.swiftdeps",
+    "diagnostics": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/ContentView.dia"
+  },
+  "/Users/danielwalker/Developer/jev-orb/Sources/App/FloatingPanel.swift": {
+    "dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/FloatingPanel.d",
+    "object": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/FloatingPanel.swift.o",
+    "swiftmodule": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/FloatingPanel~partial.swiftmodule",
+    "swift-dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/FloatingPanel.swiftdeps",
+    "diagnostics": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/FloatingPanel.dia"
+  },
+  "/Users/danielwalker/Developer/jev-orb/Sources/App/main.swift": {
+    "dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/main.d",
+    "object": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/main.swift.o",
+    "swiftmodule": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/main~partial.swiftmodule",
+    "swift-dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/main.swiftdeps",
+    "diagnostics": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/main.dia"
+  },
+  "/Users/danielwalker/Developer/jev-orb/Sources/Audio/AudioRecorder.swift": {
+    "dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/AudioRecorder.d",
+    "object": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/AudioRecorder.swift.o",
+    "swiftmodule": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/AudioRecorder~partial.swiftmodule",
+    "swift-dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/AudioRecorder.swiftdeps",
+    "diagnostics": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/AudioRecorder.dia"
+  },
+  "/Users/danielwalker/Developer/jev-orb/Sources/Dispatch/JevDispatcher.swift": {
+    "dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/JevDispatcher.d",
+    "object": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/JevDispatcher.swift.o",
+    "swiftmodule": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/JevDispatcher~partial.swiftmodule",
+    "swift-dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/JevDispatcher.swiftdeps",
+    "diagnostics": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/JevDispatcher.dia"
+  },
+  "/Users/danielwalker/Developer/jev-orb/Sources/Orb/OrbConfiguration.swift": {
+    "dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/OrbConfiguration.d",
+    "object": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/OrbConfiguration.swift.o",
+    "swiftmodule": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/OrbConfiguration~partial.swiftmodule",
+    "swift-dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/OrbConfiguration.swiftdeps",
+    "diagnostics": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/OrbConfiguration.dia"
+  },
+  "/Users/danielwalker/Developer/jev-orb/Sources/Orb/OrbView.swift": {
+    "dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/OrbView.d",
+    "object": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/OrbView.swift.o",
+    "swiftmodule": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/OrbView~partial.swiftmodule",
+    "swift-dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/OrbView.swiftdeps",
+    "diagnostics": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/OrbView.dia"
+  },
+  "/Users/danielwalker/Developer/jev-orb/Sources/Orb/ParticlesView.swift": {
+    "dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/ParticlesView.d",
+    "object": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/ParticlesView.swift.o",
+    "swiftmodule": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/ParticlesView~partial.swiftmodule",
+    "swift-dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/ParticlesView.swiftdeps",
+    "diagnostics": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/ParticlesView.dia"
+  },
+  "/Users/danielwalker/Developer/jev-orb/Sources/Orb/RealisticShadows.swift": {
+    "dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/RealisticShadows.d",
+    "object": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/RealisticShadows.swift.o",
+    "swiftmodule": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/RealisticShadows~partial.swiftmodule",
+    "swift-dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/RealisticShadows.swiftdeps",
+    "diagnostics": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/RealisticShadows.dia"
+  },
+  "/Users/danielwalker/Developer/jev-orb/Sources/Orb/RotatingGlowView.swift": {
+    "dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/RotatingGlowView.d",
+    "object": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/RotatingGlowView.swift.o",
+    "swiftmodule": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/RotatingGlowView~partial.swiftmodule",
+    "swift-dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/RotatingGlowView.swiftdeps",
+    "diagnostics": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/RotatingGlowView.dia"
+  },
+  "/Users/danielwalker/Developer/jev-orb/Sources/Orb/WavyBlobView.swift": {
+    "dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/WavyBlobView.d",
+    "object": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/WavyBlobView.swift.o",
+    "swiftmodule": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/WavyBlobView~partial.swiftmodule",
+    "swift-dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/WavyBlobView.swiftdeps",
+    "diagnostics": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/WavyBlobView.dia"
+  },
+  "/Users/danielwalker/Developer/jev-orb/Sources/Whisper/WhisperClient.swift": {
+    "dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/WhisperClient.d",
+    "object": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/WhisperClient.swift.o",
+    "swiftmodule": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/WhisperClient~partial.swiftmodule",
+    "swift-dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/WhisperClient.swiftdeps",
+    "diagnostics": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/debug/JevOrb.build/WhisperClient.dia"
+  }
+}
