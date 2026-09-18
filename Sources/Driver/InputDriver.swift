@@ -17,18 +17,26 @@ public final class InputDriver: @unchecked Sendable {
         up?.post(tap: .cghidEventTap)
     }
 
+    public func pasteText(_ text: String) {
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(text, forType: .string)
+
+        usleep(30000)
+        // Cmd + V (virtualKey 9 is kVK_ANSI_V)
+        let down = CGEvent(keyboardEventSource: nil, virtualKey: 9, keyDown: true)
+        let up = CGEvent(keyboardEventSource: nil, virtualKey: 9, keyDown: false)
+        down?.flags = .maskCommand
+        up?.flags = .maskCommand
+        down?.post(tap: .cghidEventTap)
+        usleep(40000)
+        up?.post(tap: .cghidEventTap)
+        usleep(40000)
+    }
+
     public func typeText(_ text: String) {
-        for char in text {
-            let utf16 = Array(String(char).utf16)
-            let down = CGEvent(keyboardEventSource: nil, virtualKey: 0, keyDown: true)
-            let up = CGEvent(keyboardEventSource: nil, virtualKey: 0, keyDown: false)
-            down?.keyboardSetUnicodeString(stringLength: utf16.count, unicodeString: utf16)
-            up?.keyboardSetUnicodeString(stringLength: utf16.count, unicodeString: utf16)
-            down?.post(tap: .cghidEventTap)
-            usleep(12000)
-            up?.post(tap: .cghidEventTap)
-            usleep(12000)
-        }
+        // Paste atomically to prevent browser autocomplete racing
+        pasteText(text)
     }
 
     public func pressKey(keyCode: CGKeyCode) {
@@ -43,7 +51,7 @@ public final class InputDriver: @unchecked Sendable {
         clickAt(x: x, y: y)
         usleep(80000)
 
-        // Cmd + A (Select All)
+        // Cmd + A (Select All, virtualKey 0 is kVK_ANSI_A)
         let down = CGEvent(keyboardEventSource: nil, virtualKey: 0, keyDown: true)
         let up = CGEvent(keyboardEventSource: nil, virtualKey: 0, keyDown: false)
         down?.flags = .maskCommand
@@ -53,8 +61,8 @@ public final class InputDriver: @unchecked Sendable {
         up?.post(tap: .cghidEventTap)
         usleep(50000)
 
-        typeText(text)
-        usleep(50000)
+        pasteText(text)
+        usleep(60000)
         pressKey(keyCode: 36) // Return / Enter key
     }
 }
