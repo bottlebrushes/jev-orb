@@ -22,6 +22,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         floatingPanel.orderFrontRegardless()
 
         self.panel = floatingPanel
+
+        // Verify screen capture immediately on launch
+        Task {
+            do {
+                let path = try await ScreenCaptureHelper.shared.captureVisibleScreen(outputPath: "/tmp/jev_screen.png")
+                NSLog("[JevOrb Startup Capture] SUCCESS! Wrote to %@", path)
+            } catch {
+                NSLog("[JevOrb Startup Capture] ERROR: %@", error.localizedDescription)
+            }
+        }
     }
 
     func applicationWillTerminate(_ notification: Notification) {
