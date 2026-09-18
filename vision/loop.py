@@ -7,8 +7,8 @@ import time
 import json
 import httpx
 from pathlib import Path
-from .segmenter import UISegmenter
-from .driver import click_at, type_text, press_key
+from segmenter import UISegmenter
+from driver import click_at, type_text, press_key
 
 OPENROUTER_KEY = None
 # Resolve key from ~/.omp/agent/.env if not in environment
@@ -162,16 +162,19 @@ def run_visual_task(goal: str):
         if not target:
             print(f"  Target ID {target_id} not found in elements. Retrying...")
             continue
+        recent = [h["target"] for h in history[-5:]]
+        if len(recent) >= 3 and recent.count(target["label"]) >= 3:
+            print(f"  [Jev Vision] Loop detected on '{target['label']}'. Halting.")
+            return False
 
         x, y = target["point"]
         if op == "CLICK":
             print(f"  Action: CLICK {target['role']} \"{target['label']}\" at screen coordinates ({x}, {y})")
             click_at(x, y)
             history.append({"action": "CLICK", "target": target["label"]})
-            time.sleep(0.6)  # allow page transition / click response
+            time.sleep(1.2)  # allow page transition / click response
         elif op == "TYPE_TEXT":
             text = generate_text(goal, target["label"])
-            print(f"  Action: TYPE_TEXT \"{text}\" into {target['role']} \"{target['label']}\" at ({x}, {y})")
             click_at(x, y)
             time.sleep(0.1)
             type_text(text)

@@ -15,13 +15,26 @@ MODEL_FILE = "ui-elements-detection.pt"
 
 class UISegmenter:
     def __init__(self):
-        # Load cached model or download if first run
         model_path = hf_hub_download(repo_id=MODEL_REPO, filename=MODEL_FILE)
         self.model = YOLO(model_path)
         self.classes = self.model.names
-
     def capture_screen(self, output_path: str = "/tmp/jev_screen.png") -> str:
-        """Capture the current active screen using screencapture."""
+        """Capture active page via CDP if available, otherwise fall back to screencapture."""
+        import urllib.request
+        import base64
+        try:
+            req = urllib.request.urlopen("http://127.0.0.1:9222/json/version", timeout=0.5)
+            if req.status == 200:
+                os.environ.setdefault("BU_CDP_URL", "http://127.0.0.1:9222")
+                from browser_harness.admin import ensure_daemon
+                from browser_harness.helpers import cdp
+                ensure_daemon()
+                data = cdp("Page.captureScreenshot")
+                Path(output_path).write_bytes(base64.b64decode(data["data"]))
+                return output_path
+        except Exception as e:
+            pass
+
         subprocess.run(["screencapture", "-x", output_path], check=True)
         return output_path
 
@@ -33,13 +46,19 @@ class UISegmenter:
         img = Image.open(image_path)
         width, height = img.size
 
-        # Retina scale detection (standard Mac displays are 2x)
-        # We need logical desktop coordinates for mouse clicks
-        scale_x = width / 1440.0 if width > 2000 else 1.0
-        scale_y = height / 900.0 if height > 1400 else 1.0
-        # If scale is close to 2.0 (Retina display), normalize to logical points
-        retina_factor = 2.0 if width > 2000 else 1.0
-
+        scale_x = 1.0
+        scale_y = 1.0
+        try:
+            from browser_harness.helpers import cdp
+            layout = cdp("Page.getLayoutMetrics")
+            vw = layout.get("cssVisualViewport", {}).get("clientWidth") or layout.get("cssLayoutViewport", {}).get("clientWidth")
+            vh = layout.get("cssVisualViewport", {}).get("clientHeight") or layout.get("cssLayoutViewport", {}).get("clientHeight")
+            if vw and vh:
+                scale_x = width / float(vw)
+                scale_y = height / float(vh)
+        except Exception:
+            scale_x = 2.0 if width > 1500 else 1.0
+            scale_y = 2.0 if height > 1000 else 1.0
         t0 = time.perf_counter()
         yolo_res = self.model(img, verbose=False)[0]
         t_yolo = time.perf_counter() - t0
@@ -73,9 +92,8 @@ class UISegmenter:
                 label = "input field"
 
             # Logical screen coordinates for click dispatch
-            logical_mid_x = int(((bx0 + bx1) / 2.0) / retina_factor)
-            logical_mid_y = int(((by0 + by1) / 2.0) / retina_factor)
-
+            logical_mid_x = int(((bx0 + bx1) / 2.0) / scale_x)
+            logical_mid_y = int(((by0 + by1) / 2.0) / scale_y)
             # Only include elements with valid labels or interactive roles
             if label or role in {"button", "link", "textarea", "disclosuretriangle"}:
                 element_id = str(len(elements) + 1)
