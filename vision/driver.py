@@ -2,23 +2,21 @@
 """Pure Quartz WindowServer event synthesizer for hardware-accurate screen interaction."""
 
 import time
+import subprocess
 import Quartz.CoreGraphics as CG
 
 def click_at(x: int, y: int):
     """Synthesize a hardware left mouse click at logical screen coordinates (x, y)."""
     point = CG.CGPoint(x=x, y=y)
     
-    # Move mouse
     move = CG.CGEventCreateMouseEvent(None, CG.kCGEventMouseMoved, point, CG.kCGMouseButtonLeft)
     CG.CGEventPost(CG.kCGHIDEventTap, move)
     time.sleep(0.04)
 
-    # Mouse Down
     down = CG.CGEventCreateMouseEvent(None, CG.kCGEventLeftMouseDown, point, CG.kCGMouseButtonLeft)
     CG.CGEventPost(CG.kCGHIDEventTap, down)
     time.sleep(0.05)
 
-    # Mouse Up
     up = CG.CGEventCreateMouseEvent(None, CG.kCGEventLeftMouseUp, point, CG.kCGMouseButtonLeft)
     CG.CGEventPost(CG.kCGHIDEventTap, up)
     time.sleep(0.04)
@@ -26,15 +24,14 @@ def click_at(x: int, y: int):
 def type_text(text: str):
     """Synthesize keyboard typing into the currently focused control."""
     for char in text:
-        utf16 = [ord(char)]
         down = CG.CGEventCreateKeyboardEvent(None, 0, True)
         up = CG.CGEventCreateKeyboardEvent(None, 0, False)
-        CG.CGEventKeyboardSetUnicodeString(down, len(utf16), utf16)
-        CG.CGEventKeyboardSetUnicodeString(up, len(utf16), utf16)
+        CG.CGEventKeyboardSetUnicodeString(down, len(char), char)
+        CG.CGEventKeyboardSetUnicodeString(up, len(char), char)
         CG.CGEventPost(CG.kCGHIDEventTap, down)
-        time.sleep(0.015)
+        time.sleep(0.012)
         CG.CGEventPost(CG.kCGHIDEventTap, up)
-        time.sleep(0.015)
+        time.sleep(0.012)
 
 def press_key(key_name: str):
     """Synthesize specific hardware keys (return, tab, space, escape, backspace)."""
@@ -53,3 +50,4 @@ def press_key(key_name: str):
     time.sleep(0.03)
     CG.CGEventPost(CG.kCGHIDEventTap, up)
     time.sleep(0.02)
+

@@ -98,7 +98,7 @@ def generate_text(goal: str, field_label: str) -> str:
         "Return a JSON object with exactly one key, text: the string to type into the field based on the goal. "
         "For search boxes, infer the search query. Return only: {\"text\": \"query\"}"
     )
-    user_content = f"Goal: \(goal)\nField: \(field_label)"
+    user_content = f"Goal: {goal}\nField: {field_label}"
 
     payload = {
         "model": "openai/gpt-oss-120b:nitro",
@@ -126,7 +126,6 @@ def run_visual_task(goal: str):
     print("=" * 60)
     print(f"[Jev Vision] Starting Goal: {goal}")
     print("=" * 60)
-
     segmenter = UISegmenter()
     history = []
 
