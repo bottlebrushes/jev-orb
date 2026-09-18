@@ -8,6 +8,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
 
+        // Prompt for Accessibility permission if not yet trusted
+        let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true]
+        let isTrusted = AXIsProcessTrustedWithOptions(options)
+        NSLog("[JevOrb] Accessibility isTrusted: %@", isTrusted ? "YES" : "NO")
         let contentView = ContentView()
         let hostingView = NSHostingView(rootView: contentView)
 

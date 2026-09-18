@@ -176,6 +176,7 @@ public struct ContentView: View {
                 await MainActor.run {
                     self.transcribedText = goal
                 }
+
                 logMessage("Dispatching to Jev: \"\(goal)\"...")
                 let success = try await dispatcher.dispatch(goal: goal)
                 logMessage("Jev execution returned success=\(success)")
