@@ -2,7 +2,6 @@
 """Pure Quartz WindowServer event synthesizer for hardware-accurate screen interaction."""
 
 import time
-import subprocess
 import Quartz.CoreGraphics as CG
 
 def click_at(x: int, y: int):
@@ -51,3 +50,21 @@ def press_key(key_name: str):
     CG.CGEventPost(CG.kCGHIDEventTap, up)
     time.sleep(0.02)
 
+def replace_text_at(x: int, y: int, new_text: str):
+    """Clicks an element, selects all existing text via Cmd+A, types new text, and submits with Return."""
+    click_at(x, y)
+    time.sleep(0.08)
+
+    # Cmd + A (Select All)
+    down = CG.CGEventCreateKeyboardEvent(None, 0, True)
+    up = CG.CGEventCreateKeyboardEvent(None, 0, False)
+    CG.CGEventSetFlags(down, CG.kCGEventFlagMaskCommand)
+    CG.CGEventSetFlags(up, CG.kCGEventFlagMaskCommand)
+    CG.CGEventPost(CG.kCGHIDEventTap, down)
+    time.sleep(0.04)
+    CG.CGEventPost(CG.kCGHIDEventTap, up)
+    time.sleep(0.05)
+
+    type_text(new_text)
+    time.sleep(0.05)
+    press_key("return")

@@ -8,7 +8,7 @@ import json
 import httpx
 from pathlib import Path
 from segmenter import UISegmenter
-from driver import click_at, type_text, press_key
+from driver import click_at, type_text, press_key, replace_text_at
 
 OPENROUTER_KEY = None
 if os.environ.get("OPENROUTER_API_KEY"):
@@ -43,8 +43,8 @@ def query_jev(elements: list, goal: str, history: list) -> tuple:
         }
 
     operations = {
-        "CLICK": "Click an element, button, menu option, or link.",
-        "TYPE_TEXT": "Enter or replace text in an editable field or search box.",
+        "CLICK": "Click an element, button, menu option, tab, or link.",
+        "TYPE_TEXT": "Enter text into an editable field, search input, or browser address bar to navigate.",
         "DONE": "Every requirement is visibly satisfied.",
         "BLOCKED": "No supported operation can progress."
     }
@@ -53,7 +53,7 @@ def query_jev(elements: list, goal: str, history: list) -> tuple:
         "operation": {
             "type": "choice",
             "criteria": operations,
-            "instructions": {"goal": goal}
+            "instructions": {"goal": goal, "rule": "To navigate to a new site, select TYPE_TEXT on the browser address bar."}
         },
         "click_target": {
             "type": "choice",
@@ -96,7 +96,7 @@ def generate_text(goal: str, field_label: str) -> str:
     """Generates the text string to type into a selected field using gpt-oss-120b:nitro."""
     system_prompt = (
         "Return a JSON object with exactly one key, text: the string to type into the field based on the goal. "
-        "For search boxes, infer the search query. Return only: {\"text\": \"query\"}"
+        "For browser address bars or site navigation, return the clean domain name (e.g. 'google.com' or 'wikipedia.org'). Return only: {\"text\": \"query\"}"
     )
     user_content = f"Goal: {goal}\nField: {field_label}"
 
@@ -175,12 +175,15 @@ def run_visual_task(goal: str):
         elif op == "TYPE_TEXT":
             text = generate_text(goal, target["label"])
             print(f"  Action: TYPE_TEXT \"{text}\" into {target['role']} \"{target['label']}\" at ({x}, {y})")
-            click_at(x, y)
-            time.sleep(0.1)
-            type_text(text)
-            press_key("return")
+            if target["role"] == "addressbar":
+                replace_text_at(x, y, text)
+            else:
+                click_at(x, y)
+                time.sleep(0.1)
+                type_text(text)
+                press_key("return")
             history.append({"action": "TYPE_TEXT", "target": target["label"], "text": text})
-            time.sleep(1.0)  # allow search submit
+            time.sleep(1.2)  # allow page transition / search submit
 
     print("[Jev Vision] Step budget reached.")
     return False

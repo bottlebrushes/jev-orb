@@ -46,6 +46,7 @@ class UISegmenter:
 
         boxes = yolo_res.boxes
         elements = []
+        covered_ocr = set()
 
         for i, box in enumerate(boxes):
             cls_id = int(box.cls[0].item())
@@ -56,15 +57,15 @@ class UISegmenter:
             bx0, by0, bx1, by1 = [int(v) for v in box.xyxy[0].tolist()]
 
             matched_words = []
-            for text, conf_ocr, (ox, oy, ow, oh) in ocr_res:
+            for idx, (text, conf_ocr, (ox, oy, ow, oh)) in enumerate(ocr_res):
                 if not (ox + ow < bx0 - 5 or ox > bx1 + 5 or oy + oh < by0 - 5 or oy > by1 + 5):
                     matched_words.append(text.strip())
+                    covered_ocr.add(idx)
 
             label = " ".join(matched_words) if matched_words else ""
             if not label and role == "textarea":
                 label = "search/text input"
 
-            # Convert retina image pixels to logical screen coordinates for Quartz mouse clicks
             logical_mid_x = int(((bx0 + bx1) / 2.0) / retina_factor)
             logical_mid_y = int(((by0 + by1) / 2.0) / retina_factor)
 
@@ -79,6 +80,23 @@ class UISegmenter:
                     "confidence": conf
                 })
 
+        # Include standalone OCR elements not captured by YOLO (e.g. browser address bar, links, tabs)
+        for idx, (text, conf_ocr, (ox, oy, ow, oh)) in enumerate(ocr_res):
+            clean = text.strip()
+            if idx not in covered_ocr and len(clean) > 1:
+                is_url = "http" in clean or "www." in clean or ".co" in clean or ".org" in clean or ".com" in clean
+                role = "addressbar" if is_url else "link"
+                element_id = str(len(elements) + 1)
+                logical_mid_x = int((ox + ow / 2.0) / retina_factor)
+                logical_mid_y = int((oy + oh / 2.0) / retina_factor)
+                elements.append({
+                    "id": element_id,
+                    "role": role,
+                    "label": clean,
+                    "point": [logical_mid_x, logical_mid_y],
+                    "raw_box": [int(ox), int(oy), int(ox + ow), int(oy + oh)],
+                    "confidence": float(conf_ocr)
+                })
         return {
             "image_path": image_path,
             "width": width,
