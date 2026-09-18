@@ -48,5 +48,8 @@ cat <<EOF > "$APP_DIR/Contents/Info.plist"
 </plist>
 EOF
 
-echo "✓ Created $APP_DIR"
+echo 'designated => identifier "ai.jev.orb"' | csreq -r- -b /tmp/req.bin
+codesign --force --deep -s - -r /tmp/req.bin "$APP_DIR"
+
+echo "✓ Created and signed $APP_DIR"
 echo "You can launch it with: open \"$APP_DIR\""
