@@ -69,12 +69,19 @@ public final class AudioRecorder: ObservableObject {
         let bytes = Data(bytes: channelData, count: frameLength * MemoryLayout<Float>.size)
         recordedData.append(bytes)
     }
-
     private func convertTo16kHzWav(rawData: Data, sourceFormat: AVAudioFormat) -> Data? {
         let frameCount = rawData.count / MemoryLayout<Float>.size
         let floatSamples = rawData.withUnsafeBytes { ptr in
             Array(ptr.bindMemory(to: Float.self))
         }
+
+        // Auto-gain normalization: scale quiet microphone speech up to healthy ~85% peak level
+        var maxPeak: Float = 0.0
+        for s in floatSamples {
+            let a = abs(s)
+            if a > maxPeak { maxPeak = a }
+        }
+        let gain: Float = maxPeak > 0.002 ? min(0.85 / maxPeak, 12.0) : 1.0
 
         // Downsample / resample to 16000 Hz mono PCM16
         let sourceRate = sourceFormat.sampleRate
@@ -86,7 +93,8 @@ public final class AudioRecorder: ObservableObject {
         for i in 0..<targetFrameCount {
             let srcIndex = Int(Double(i) * ratio)
             if srcIndex < floatSamples.count {
-                let clamped = max(-1.0, min(1.0, floatSamples[srcIndex]))
+                let sample = floatSamples[srcIndex] * gain
+                let clamped = max(-1.0, min(1.0, sample))
                 let int16Val = Int16(clamped * 32767.0)
                 pcm16Samples.append(int16Val)
             }

@@ -58,38 +58,26 @@ public struct ContentView: View {
             VStack {
                 Spacer()
 
-                Button(action: {}) {
+                Button(action: {
+                    toggleListening()
+                }) {
                     HStack(spacing: 8) {
                         Image(systemName: buttonIcon)
                             .font(.system(size: 13, weight: .bold))
                         Text(statusLabel)
                             .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .lineLimit(1)
                     }
                     .foregroundColor(.white)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)
                     .background(
                         Capsule()
-                            .fill(Color.black.opacity(0.65))
-                            .overlay(Capsule().stroke(Color.white.opacity(0.2), lineWidth: 1))
+                            .fill(Color.black.opacity(0.75))
+                            .overlay(Capsule().stroke(Color.white.opacity(0.25), lineWidth: 1))
                     )
                 }
                 .buttonStyle(.plain)
-                .simultaneousGesture(
-                    DragGesture(minimumDistance: 0)
-                        .onChanged { _ in
-                            if !isHoldingButton && (orbState == .idle || orbState == .success) {
-                                isHoldingButton = true
-                                startListening()
-                            }
-                        }
-                        .onEnded { _ in
-                            if isHoldingButton {
-                                isHoldingButton = false
-                                stopListeningAndExecute()
-                            }
-                        }
-                )
                 .padding(.bottom, 8)
             }
         }
@@ -99,7 +87,7 @@ public struct ContentView: View {
     private var buttonIcon: String {
         switch orbState {
         case .idle: return "mic.fill"
-        case .listening: return "waveform"
+        case .listening: return "waveform.circle.fill"
         case .thinking: return "gearshape.2.fill"
         case .success: return "checkmark.circle.fill"
         case .error: return "exclamationmark.triangle.fill"
@@ -108,39 +96,79 @@ public struct ContentView: View {
 
     private var statusLabel: String {
         switch orbState {
-        case .idle: return "Hold to Speak"
-        case .listening: return "Listening..."
-        case .thinking: return "Jev Driving..."
-        case .success: return "Done"
-        case .error(let msg): return msg
+        case .idle:
+            return "Click or Hold to Speak"
+        case .listening:
+            return "Listening... (Click to Stop)"
+        case .thinking:
+            if transcribedText.isEmpty {
+                return "Transcribing voice..."
+            } else {
+                return "Jev: \(transcribedText)"
+            }
+        case .success:
+            return "Done!"
+        case .error(let msg):
+            return msg
+        }
+    }
+
+    private func toggleListening() {
+        if orbState == .listening {
+            stopListeningAndExecute()
+        } else if orbState == .idle || orbState == .success {
+            startListening()
         }
     }
 
     private func startListening() {
         orbState = .listening
         transcribedText = ""
+        logMessage("Started listening on microphone...")
         do {
             try recorder.startRecording()
         } catch {
+            logMessage("Microphone recording error: \(error)")
             orbState = .error("Mic Error")
+        }
+    }
+    private func logMessage(_ msg: String) {
+        let line = "[\(Date())] \(msg)\n"
+        let logPath = "/tmp/jevorb.log"
+        if !FileManager.default.fileExists(atPath: logPath) {
+            FileManager.default.createFile(atPath: logPath, contents: nil)
+        }
+        if let handle = FileHandle(forWritingAtPath: logPath) {
+            handle.seekToEndOfFile()
+            if let data = line.data(using: .utf8) {
+                handle.write(data)
+            }
         }
     }
 
     private func stopListeningAndExecute() {
+        logMessage("Stop listening called. Finalizing audio...")
         guard let wavData = recorder.stopRecording() else {
+            logMessage("No audio data captured.")
             orbState = .idle
             return
         }
 
+        logMessage("Captured WAV audio: \(wavData.count) bytes. Sending to Whisper...")
         orbState = .thinking
 
         Task {
             do {
-                // Transcribe with local Metal Whisper
+                try? wavData.write(to: URL(fileURLWithPath: "/tmp/last_recorded.wav"))
                 let goal = try await whisper.transcribe(wavData: wavData)
+                logMessage("Whisper transcribed goal: \"\(goal)\"")
                 if goal.isEmpty {
+                    logMessage("Goal is empty, reporting No speech heard.")
                     await MainActor.run {
-                        orbState = .idle
+                        orbState = .error("No speech heard")
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                            orbState = .idle
+                        }
                     }
                     return
                 }
@@ -148,13 +176,13 @@ public struct ContentView: View {
                 await MainActor.run {
                     self.transcribedText = goal
                 }
-
-                // Dispatch to Jev Ultrafast
+                logMessage("Dispatching to Jev: \"\(goal)\"...")
                 let success = try await dispatcher.dispatch(goal: goal)
+                logMessage("Jev execution returned success=\(success)")
+
                 await MainActor.run {
                     if success {
                         orbState = .success
-                        // Silent completion: quick pause then reset to idle
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
                             orbState = .idle
                         }
@@ -166,6 +194,7 @@ public struct ContentView: View {
                     }
                 }
             } catch {
+                logMessage("Error in whisper or dispatch: \(error.localizedDescription)")
                 await MainActor.run {
                     orbState = .error("Error")
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {

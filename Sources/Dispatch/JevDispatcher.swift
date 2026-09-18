@@ -17,10 +17,21 @@ public final class JevDispatcher: @unchecked Sendable {
                 let process = Process()
                 process.executableURL = URL(fileURLWithPath: execPath)
                 process.arguments = [goal]
+                var env = ProcessInfo.processInfo.environment
+                let home = NSHomeDirectory()
+                env["HOME"] = home
+                env["PATH"] = "\(home)/.local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+                process.environment = env
 
-                let pipe = Pipe()
-                process.standardOutput = pipe
-                process.standardError = pipe
+                let logPath = "/tmp/jevorb.log"
+                if !FileManager.default.fileExists(atPath: logPath) {
+                    FileManager.default.createFile(atPath: logPath, contents: nil)
+                }
+                if let logHandle = FileHandle(forWritingAtPath: logPath) {
+                    logHandle.seekToEndOfFile()
+                    process.standardOutput = logHandle
+                    process.standardError = logHandle
+                }
 
                 do {
                     try process.run()
