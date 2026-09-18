@@ -39,11 +39,23 @@ public final class WhisperClient {
             throw NSError(domain: "WhisperClient", code: status, userInfo: [NSLocalizedDescriptionKey: "Server error \(status): \(errText)"])
         }
 
-        struct WhisperResponse: Decodable {
+        struct WhisperSegment: Decodable {
             let text: String?
         }
 
+        struct WhisperResponse: Decodable {
+            let text: String?
+            let segments: [WhisperSegment]?
+        }
+
         let decoded = try JSONDecoder().decode(WhisperResponse.self, from: data)
-        return (decoded.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        if let text = decoded.text, !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return text.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        if let segments = decoded.segments {
+            let combined = segments.compactMap { $0.text }.joined(separator: " ")
+            return combined.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        return ""
     }
 }
