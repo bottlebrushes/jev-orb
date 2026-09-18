@@ -51,8 +51,13 @@ def query_jev(elements: list, goal: str, history: list) -> tuple:
         "BLOCKED": "No supported operation can progress."
     }
 
-    app_rule = "Each element is tagged with its owning application, e.g. [Microsoft Edge], [Ghostty], [Firefox]. Always select the control belonging to the application relevant to the goal. For browser tasks, choose controls tagged with the browser application."
-
+    app_rule = (
+        "Each element is tagged with its owning application, e.g. [Microsoft Edge], [Ghostty], [Firefox]. Always select the control belonging to the application relevant to the goal.\n"
+        "RULES:\n"
+        "1. If the browser address bar or active page already visibly displays the requested destination (e.g. Google), select DONE immediately.\n"
+        "2. Do not click '+' or New Tab buttons unless explicitly asked to open a new tab. Always navigate within the existing active tab.\n"
+        "3. To navigate to a new site, select TYPE_TEXT on the browser address bar."
+    )
     questions = {
         "operation": {
             "type": "choice",
