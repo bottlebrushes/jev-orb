@@ -6,7 +6,7 @@ public final class JevDispatcher: @unchecked Sendable {
 
     private let jevExecutable: String
 
-    public init(jevExecutable: String = "\(NSHomeDirectory())/.local/bin/jev") {
+    public init(jevExecutable: String = "\(NSHomeDirectory())/Developer/jev-orb/vision/run_vision.sh") {
         self.jevExecutable = jevExecutable
     }
 

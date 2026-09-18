@@ -51,14 +51,30 @@ components:
             3: Extracts clean transcribed goal text from server response
             4: Fails gracefully if whisper server is unreachable and transitions orb to error state
 
-    DISPATCH:
-        description: Autonomous browser execution via Jev Ultrafast
+    VISION:
+        description: On-device screen capture, YOLO UI segmentation, and Apple Vision OCR
         requirements:
-            1: Spawns or calls Jev Ultrafast agent with the transcribed goal
-            2: Targets the user's currently running browser (Edge, Firefox, Chrome, Safari)
-            3: Relies on typesafe/jev-1.13 and openai/gpt-oss-120b:nitro via OpenRouter
-            4: Signals completion back to the orb UI when Jev reaches STATUS: DONE
+            1: Captures active window/display pixel buffer with high-fidelity retina scaling
+            2: Executes local YOLO11 UI elements detection (AXButton, AXLink, AXTextArea, AXImage) on Apple Silicon
+            3: Executes local Apple Vision OCR (VNRecognizeTextRequest) in parallel on the same frame buffer
+            4: Runs completely offline without sending screen pixels to external servers
 
+    FUSION:
+        description: Spatial bounding box intersection and action space generation
+        requirements:
+            1: Intersects OCR text spans with detected UI element bounding boxes
+            2: Produces labeled elements combining role and text (e.g. AXButton "Search")
+            3: Calculates precise click coordinates (x, y) at the centroid of each element
+            4: Emits numbered indexed action space: [1] role "label" -> (x, y)
+
+    DISPATCH:
+        description: Autonomous visual driving via Jev and Quartz WindowServer events
+        requirements:
+            1: Passes indexed visual action space to typesafe/jev-1.13 on OpenRouter
+            2: Dispatches native Quartz mouse clicks directly at target (x, y) coordinates
+            3: Dispatches native Quartz keyboard events for text input
+            4: Completely browser-agnostic: operates identically on Firefox, Safari, Edge, Chrome, or native apps
+            5: Signals completion back to the orb UI when Jev reaches STATUS: DONE
 constraints:
     UX:
         requirements:
