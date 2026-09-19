@@ -10,7 +10,7 @@ Built with **pure SwiftUI** and **AppKit**, isolating all OS-level permissions i
 
 - **Push-to-Talk Siri Orb:** Powered by a pure SwiftUI port of [`metasidd/Orb`](https://github.com/metasidd/Orb). Fluid wavy blobs, rotating depth glows, and floating particles.
 - **Audio-Reactive Metering:** The orb expands and intensifies in real-time based on your microphone's live RMS volume.
-- **Local Metal Whisper STT:** Transcribes speech in ~300ms using local GPU-accelerated Metal Whisper (`whispercpp-metal`).
+- **Local Metal Whisper STT:** Uses the local inference endpoint when available and falls back to the installed Metal-accelerated `whisper-cli` with the local model when that server is not running.
 - **Generic Semantic Navigation:** Works with native applications and browser content exposed through the same semantic accessibility trees used by VoiceOver. Applications, websites, labels, and workflows are not hard-coded.
 - **Silent Dismissal:** No voice speech or TTS chatter on completion—pulses emerald green upon finishing and quietly resets.
 - **Permission Isolation:** macOS Accessibility and Microphone permissions belong to `JevOrb.app`, not the invoking terminal. Screen Recording permission is not required.
@@ -26,7 +26,7 @@ The execution contract is defined in `features/jev-orb.feature.yaml`. The runtim
 |---|---|
 | **Overlay and orb** | A transparent, nonactivating `NSPanel` with listening, thinking, success, and error feedback that does not steal the user's application focus while recording. |
 | **AudioRecorder** | Local microphone capture, live RMS metering, and 16 kHz WAV encoding. |
-| **WhisperClient** | Local speech transcription through the configured Whisper endpoint. |
+| **WhisperClient** | Local speech transcription through the configured inference endpoint, with a local Metal `whisper-cli` fallback and model discovery. |
 | **Application catalog** | Running and installed application discovery through public macOS APIs; application and window selection rather than browser-only targeting. |
 | **AX session** | Semantic tree observation, generation-scoped element references, and validation of application, window, element identity, and supported actions. |
 | **JevDispatcher** | Interprets the goal, selects a semantic operation, executes it, and re-observes the resulting AX state before continuing or reporting completion. |

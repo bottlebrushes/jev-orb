@@ -9,13 +9,15 @@ swift build -c release
 
 BIN_PATH="$(swift build -c release --show-bin-path)/JevOrb"
 APP_DIR="$DIR/build/JevOrb.app"
+INSTALL_DIR="$HOME/Applications"
+INSTALLED_APP="$INSTALL_DIR/JevOrb.app"
 
 rm -rf "$APP_DIR"
-mkdir -p "$APP_DIR/Contents/MacOS"
-mkdir -p "$APP_DIR/Contents/Resources"
+mkdir -p "$APP_DIR/Contents/MacOS" "$APP_DIR/Contents/Resources"
 
 cp "$BIN_PATH" "$APP_DIR/Contents/MacOS/JevOrb"
 chmod +x "$APP_DIR/Contents/MacOS/JevOrb"
+cp "$DIR/Resources/AppIcon.icns" "$APP_DIR/Contents/Resources/AppIcon.icns"
 
 cat <<EOF > "$APP_DIR/Contents/Info.plist"
 <?xml version="1.0" encoding="UTF-8"?>
@@ -30,6 +32,10 @@ cat <<EOF > "$APP_DIR/Contents/Info.plist"
     <string>JevOrb</string>
     <key>CFBundleDisplayName</key>
     <string>Jev Orb</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon.icns</string>
+    <key>CFBundleIconName</key>
+    <string>AppIcon</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
@@ -46,8 +52,15 @@ cat <<EOF > "$APP_DIR/Contents/Info.plist"
 </plist>
 EOF
 
+# TCC continuity depends on keeping the bundle identifier, designated
+# requirement, and canonical installed path stable across rebuilds.
 echo 'designated => identifier "ai.jev.orb"' | csreq -r- -b /tmp/req.bin
 codesign --force --deep -s - -r /tmp/req.bin "$APP_DIR"
 
+mkdir -p "$INSTALL_DIR"
+rm -rf "$INSTALLED_APP"
+ditto "$APP_DIR" "$INSTALLED_APP"
+
 echo "✓ Created and signed $APP_DIR"
-echo "You can launch it with: open \"$APP_DIR\""
+echo "✓ Installed canonical app at $INSTALLED_APP"
+echo "You can launch with: open \"$INSTALLED_APP\""
