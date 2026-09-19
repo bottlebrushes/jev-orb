@@ -1,83 +1,723 @@
 feature:
-    name: jev-orb
-    product: jev-orb
-    version: 1.0.0
-    description: |
-        JevOrb is a lightweight, native macOS push-to-talk voice orb application that
-        drives web browsers using Jev Ultrafast and local Metal Whisper STT.
-        It isolates Accessibility and Screen Recording permissions into an independent .app bundle.
+  name: jev-orb
+  product: jev-orb
+  version: 2.0.0
+  status: implementation-ready
+  description: |
+    JevOrb is a native macOS push-to-talk assistant that executes arbitrary
+    spoken goals through the macOS Accessibility API. It observes and operates
+    the same semantic accessibility trees exposed to VoiceOver. It does not use
+    pixels, screenshots, OCR, browser debugging protocols, or coordinate-based
+    input. Commands are interpreted at runtime; applications, websites, labels,
+    and workflows are not hard-coded.
+  supported_scope: |
+    Arbitrary single-application or multi-application commands whose required
+    controls, content, and completion state are exposed through the macOS
+    accessibility system. This includes native applications and browser DOM
+    content surfaced as accessibility nodes by the browser. Support is defined
+    by semantic capabilities, not a list of pre-approved applications or tasks.
+  explicit_non_goals:
+    - Pixel or screenshot interpretation.
+    - YOLO, OCR, image matching, or coordinate target selection.
+    - CDP, Playwright, WebDriver, browser extensions, or remote-debugging ports.
+    - Guessing at controls that are absent from the accessibility tree.
+    - Bypassing login, MFA, consent, permission, or anti-automation barriers.
+    - Completing purchases or bookings when the command only requests research.
+    - Guaranteeing control of content that an application does not expose through macOS accessibility.
+
+architecture:
+  execution_path:
+    - Capture speech in JevOrb.app without activating or stealing focus from the user's current application.
+    - Transcribe speech locally through the configured Whisper endpoint.
+    - Snapshot the running-application catalog and preserve the user's frontmost application as the initial target context.
+    - Resolve or launch the requested application using AppKit and Workspace APIs.
+    - Observe the target application's focused window through AXUIElement.
+    - Project actionable accessibility nodes and relevant semantic context to Jev.
+    - Validate the selected application, window, observation generation, element identity, and supported action.
+    - Execute one semantic accessibility action.
+    - Observe and verify the resulting state before planning another action.
+    - Return a structured completion, blocked, failed, or delivery-uncertain result to the orb.
+  process_boundary:
+    owner: JevOrb.app
+    rule: |
+      Accessibility observation and action execution MUST remain inside the
+      JevOrb application process or a bundled helper signed as part of the same
+      application. The implementation MUST NOT delegate accessibility access to
+      a shell, terminal, Python environment, or separately permissioned process.
+  retained_components:
+    - SwiftUI orb and floating nonactivating panel.
+    - AudioRecorder and live audio metering.
+    - WhisperClient and local speech transcription.
+    - JevDispatcher as the asynchronous goal-execution boundary.
+  replaced_components:
+    - vision/loop.py
+    - vision/segmenter.py
+    - vision/driver.py
+    - ScreenCaptureHelper for navigation.
+    - Coordinate DISPATCH messages.
+    - InputDriver.clickAt for semantic application control.
+  permitted_input_fallback: |
+    Keyboard input MAY be synthesized only after an element and window have
+    been selected and focused through AX. The target application, target window,
+    and focused AX element MUST be revalidated immediately before the keystroke.
+    Mouse coordinates and image-derived locations are never permitted.
+
+invariants:
+  - id: INV-1
+    statement: Every target is derived from an AX observation, an application catalog entry, or a window catalog entry.
+  - id: INV-2
+    statement: Every element reference is scoped to one session, process, window, and observation generation.
+  - id: INV-3
+    statement: Stale, missing, disabled, unsupported, or ambiguous targets are never acted upon.
+  - id: INV-4
+    statement: An action is not successful until an independent post-action AX observation proves its expected effect.
+  - id: INV-5
+    statement: Potentially non-idempotent actions are never automatically replayed after uncertain delivery.
+  - id: INV-6
+    statement: Window position, pixel dimensions, display scale, overlap, and occlusion never participate in target identity.
+  - id: INV-7
+    statement: Secure text values, credentials, and protected content are never logged or sent to a model.
+  - id: INV-8
+    statement: Application switching and launching use public macOS workspace and accessibility APIs.
+  - id: INV-9
+    statement: Fixed sleeps are not used as evidence that an application or action is ready.
+  - id: INV-10
+    statement: A command may affect only the applications and external side effects necessary to satisfy that command.
 
 components:
-    OVERLAY:
-        description: Floating non-activating transparent window panel
-        requirements:
-            1: Window is an NSPanel configured with .nonactivatingPanel so it never steals focus from the active browser
-            2: Window level is set to .floating to remain visible above all desktop applications
-            3: Window has a completely transparent background (.clear) and no window chrome or shadow
-            4: Window is centered on the active display and sizes to fit the glowing orb canvas (260x260 pt)
-            5: Window shows immediately on hotkey press and fades out upon completion
+  OVERLAY:
+    description: Floating nonactivating visual state indicator.
+    requirements:
+      OVERLAY-1: Use NSPanel with nonactivatingPanel behavior so recording does not replace the user's frontmost application.
+      OVERLAY-2: Preserve the frontmost application and focused window when a command begins.
+      OVERLAY-3: Remain visible without becoming the AX target application.
+      OVERLAY-4: Expose idle, listening, thinking, executing, success, blocked, and error states.
+      OVERLAY-5: Never cover state transitions with spoken or TTS output.
 
-    ORB:
-        description: Siri-style glowing animated visualizer based on metasidd/Orb
-        requirements:
-            1: Renders a multi-layer organic glowing orb with rotating depth glows, wavy blobs, core glow, and particles
-            2: Supports IDLE state: dormant subtle breathing pulse
-            3: Supports LISTENING state: active multi-color bloom with live audio reactivity
-            4: Real-time audio reactive: microphone RMS input levels dynamically scale core glow intensity and rotation speed
-            5: Supports THINKING state: rapid cosmic swirling animation while Jev and text models evaluate actions
-            6: Supports SUCCESS state: transitions gradient to emerald green, pulses once, and fades to dismiss
+  AUDIO:
+    description: Low-latency microphone capture and transcription input.
+    requirements:
+      AUDIO-1: Capture audio through AVAudioEngine and compute live RMS metering.
+      AUDIO-2: Produce 16 kHz mono 16-bit PCM WAV data when recording ends.
+      AUDIO-3: Tear down the audio engine after each recording.
+      AUDIO-4: Send the WAV payload to the configured local Whisper endpoint.
+      AUDIO-5: Reject empty transcription before creating an execution session.
 
-    HOTKEY:
-        description: Push-to-talk activation mechanism
-        requirements:
-            1: Monitors global keyboard events without requiring the app to be focused
-            2: Key-down initiates audio capture and transitions orb to LISTENING
-            3: Key-up terminates audio capture and transitions orb to THINKING
-            4: Default trigger is hold-to-talk on Right Option or double-tap Option
+  PERMISSIONS:
+    description: Permission ownership and readiness checks.
+    requirements:
+      PERMISSIONS-1: Check AXIsProcessTrustedWithOptions before accepting an executable command.
+      PERMISSIONS-2: Accessibility permission belongs to JevOrb.app or its signed bundled helper, never the invoking terminal.
+      PERMISSIONS-3: Microphone permission belongs to JevOrb.app.
+      PERMISSIONS-4: Screen Recording permission is not required for navigation.
+      PERMISSIONS-5: Report missing accessibility permission as a blocked result with an actionable explanation.
+      PERMISSIONS-6: Never continue into a partial coordinate or screenshot fallback when permission is missing.
 
-    AUDIO:
-        description: Low-latency microphone capture and audio level metering
-        requirements:
-            1: Uses AVAudioEngine to stream microphone input buffer in real time
-            2: Computes RMS audio power on every audio buffer tap to drive visual reactivity (0.0 to 1.0)
-            3: Encodes the recorded speech into a 16kHz mono 16-bit PCM WAV buffer upon key-up
-            4: Completely tears down audio engine and mic session after capture
+  APP_CATALOG:
+    description: Semantic inventory of running and installed GUI applications.
+    implementation:
+      running_source: NSWorkspace.shared.runningApplications
+      installed_source: NSMetadataQuery over application bundles, with standard application-directory fallback
+      lifecycle_notifications:
+        - NSWorkspace.didLaunchApplicationNotification
+        - NSWorkspace.didTerminateApplicationNotification
+        - NSWorkspace.didActivateApplicationNotification
+        - NSWorkspace.didHideApplicationNotification
+        - NSWorkspace.didUnhideApplicationNotification
+    requirements:
+      APP-1: Include every running regular GUI application and exclude agents, daemons, menu extras, and background-only processes.
+      APP-2: Include display name, bundle identifier, process identifier, executable URL, active state, hidden state, and launch state.
+      APP-3: Query each accessible running application for its windows without traversing each full window tree.
+      APP-4: Include window title, role, subrole, minimized state, main state, focused state, and opaque window reference.
+      APP-5: Build and cache a searchable inventory of installed launchable applications.
+      APP-6: Refresh the installed inventory when application directories change or when an explicit lookup misses.
+      APP-7: Expose the complete application inventory through a LIST_APPLICATIONS operation.
+      APP-8: Include the running application inventory in every top-level planning observation.
+      APP-9: Include installed applications in model context only when resolving a launch request or when explicitly requested.
+      APP-10: Never infer an application from a process with activationPolicy other than regular unless explicitly allowlisted.
+    name_resolution:
+      precedence:
+        - Exact case-insensitive display-name match.
+        - Exact bundle-identifier match.
+        - Explicit configured alias match.
+        - Unique normalized prefix or token match.
+        - Unique fuzzy match above the configured confidence threshold.
+      ambiguity_rule: Multiple viable matches produce AMBIGUOUS_APPLICATION and no activation or launch.
+      browser_rule: A generic browser request prefers the currently active supported browser, then a running supported browser, then the system default HTTP handler.
 
-    WHISPER:
-        description: Local Metal-accelerated speech-to-text integration
-        requirements:
-            1: Posts 16kHz WAV payload to local Whisper server endpoint (default: http://127.0.0.1:49868/inference)
-            2: Transcribes speech with sub-500ms latency on Apple Silicon Metal
-            3: Extracts clean transcribed goal text from server response
-            4: Fails gracefully if whisper server is unreachable and transitions orb to error state
+  APPLICATION_CONTROL:
+    description: Launching, activating, restoring, and focusing applications and windows.
+    requirements:
+      APPCTL-1: Activate a running application with NSRunningApplication.activate.
+      APPCTL-2: Launch an installed application with NSWorkspace.openApplication using its resolved application URL.
+      APPCTL-3: Wait for workspace activation or launch notification and verify the target process is running.
+      APPCTL-4: Restore a minimized target window through its settable AXMinimized attribute.
+      APPCTL-5: Raise the target window with AXRaise and set main or focused attributes only when supported and settable.
+      APPCTL-6: Verify the application is frontmost and the intended window is main or focused before observing its controls.
+      APPCTL-7: Preserve window size and position by default.
+      APPCTL-8: Do not create duplicate application instances when an eligible running instance exists.
+      APPCTL-9: If an application launches without a window, observe lifecycle and menu state rather than assuming failure.
+      APPCTL-10: Return a bounded timeout failure instead of sleeping indefinitely.
 
-    VISION:
-        description: On-device screen capture, YOLO UI segmentation, and Apple Vision OCR
-        requirements:
-            1: Captures active window/display pixel buffer with high-fidelity retina scaling
-            2: Executes local YOLO11 UI elements detection (AXButton, AXLink, AXTextArea, AXImage) on Apple Silicon
-            3: Executes local Apple Vision OCR (VNRecognizeTextRequest) in parallel on the same frame buffer
-            4: Runs completely offline without sending screen pixels to external servers
+  AX_OBSERVATION:
+    description: Structured extraction of the semantic tree used by VoiceOver.
+    root_selection:
+      - AXUIElementCreateApplication with the target PID.
+      - AXFocusedWindow when available.
+      - AXMainWindow when no focused window exists.
+      - An explicitly selected catalog window when switching or restoring.
+    attributes:
+      identity:
+        - AXRole
+        - AXSubrole
+        - AXIdentifier
+        - AXTitle
+        - AXDescription
+        - AXHelp
+        - AXRoleDescription
+      state:
+        - AXValue
+        - AXEnabled
+        - AXFocused
+        - AXSelected
+        - AXExpanded
+        - AXMinimized
+        - AXRequired
+        - AXVisited
+      structure:
+        - AXParent
+        - AXChildren
+        - AXVisibleChildren
+        - AXSelectedChildren
+        - AXRows
+        - AXColumns
+        - AXContents
+        - AXLinkedUIElements
+        - AXTitleUIElement
+        - AXServesAsTitleForUIElements
+      metadata:
+        - supported_attribute_names
+        - settable_attributes
+        - supported_action_names
+    requirements:
+      AXOBS-1: Read attributes in batches with AXUIElementCopyMultipleAttributeValues where supported.
+      AXOBS-2: Traverse iteratively with cycle detection and explicit node, depth, and elapsed-time budgets.
+      AXOBS-3: Include semantic containers required to preserve ancestry, labels, tables, lists, groups, web areas, dialogs, and menus.
+      AXOBS-4: Mark nodes actionable only from their supported AX actions or settable attributes, not from role-name heuristics alone.
+      AXOBS-5: Preserve nearby labels, containing row or list-item context, and semantic ancestors for target selection.
+      AXOBS-6: Represent browser DOM only through the accessibility nodes exposed by the browser.
+      AXOBS-7: Represent off-screen or collapsed content only when it exists in the AX tree; otherwise discover it through semantic scrolling, expansion, or menu actions.
+      AXOBS-8: Omit secure text values, password values, protected content, and values denied by the accessibility API.
+      AXOBS-9: Record per-node read failures without invalidating the entire snapshot unless the root window becomes unavailable.
+      AXOBS-10: Treat kAXErrorCannotComplete, invalid UI elements, and process termination as recoverable observation failures with bounded retries.
+      AXOBS-11: Set a finite per-process accessibility messaging timeout.
+      AXOBS-12: Never read AXPosition or AXSize for target selection, target ranking, identity, or action execution.
 
-    FUSION:
-        description: Spatial bounding box intersection and action space generation
-        requirements:
-            1: Intersects OCR text spans with detected UI element bounding boxes
-            2: Produces labeled elements combining role and text (e.g. AXButton "Search")
-            3: Calculates precise click coordinates (x, y) at the centroid of each element
-            4: Emits numbered indexed action space: [1] role "label" -> (x, y)
+  AX_IDENTITY:
+    description: Generation-scoped references and stale-target prevention.
+    reference_format: "@<session-id>:<pid>:<window-id>:<generation>:<node-id>"
+    fingerprint_fields:
+      - process identifier
+      - window identity
+      - AXIdentifier when available
+      - role and subrole
+      - title or accessible name
+      - stable value class, excluding mutable user text
+      - semantic ancestor roles and names
+      - supported actions
+    requirements:
+      AXID-1: Keep raw AXUIElement handles private to the current in-memory observation.
+      AXID-2: Increment the observation generation after every action, activation, launch, window switch, structural notification, or explicit re-observation.
+      AXID-3: Reject references from any prior generation.
+      AXID-4: Immediately before execution, verify that the process exists, the intended window remains selected, and the element still has the expected identity and action support.
+      AXID-5: If the raw element is invalid, re-resolve by fingerprint only when exactly one live match exists in the same window.
+      AXID-6: Never silently choose the first element when multiple controls share the same role and name.
+      AXID-7: Use ancestry, table-row context, list-item context, selected state, and explicit identifiers to disambiguate repeated labels.
+      AXID-8: Return STALE_REFERENCE or AMBIGUOUS_TARGET before dispatching any input when validation fails.
 
-    DISPATCH:
-        description: Autonomous visual driving via Jev and Quartz WindowServer events
-        requirements:
-            1: Passes indexed visual action space to typesafe/jev-1.13 on OpenRouter
-            2: Dispatches native Quartz mouse clicks directly at target (x, y) coordinates
-            3: Dispatches native Quartz keyboard events for text input
-            4: Completely browser-agnostic: operates identically on Firefox, Safari, Edge, Chrome, or native apps
-            5: Signals completion back to the orb UI when Jev reaches STATUS: DONE
-constraints:
-    UX:
-        requirements:
-            1: Silent completion: zero voice or TTS speech is produced upon finishing the task
-            2: Low latency: total visual response time from key-release to thinking state is under 50ms
-            3: Permission isolation: all macOS Accessibility, Screen Recording, and Mic permissions belong solely to JevOrb.app
+  AX_ACTIONS:
+    description: Closed semantic operation set.
+    operations:
+      LIST_APPLICATIONS:
+        target: none
+        effect: Return running and installed application descriptors without changing focus.
+      SWITCH_APPLICATION:
+        target: application reference
+        effect: Activate an existing application and focus its selected window.
+      LAUNCH_APPLICATION:
+        target: installed application reference
+        effect: Launch and verify an application, then select its main or focused window.
+      FOCUS_WINDOW:
+        target: window reference
+        effect: Restore, raise, and verify the selected window.
+      PERFORM_ACTION:
+        target: element reference
+        arguments:
+          - exact AX action name
+        effect: Invoke AXUIElementPerformAction only when the action is currently supported.
+      SET_VALUE:
+        target: element reference
+        arguments:
+          - string, number, or allowed AX value
+        effect: Set a currently settable AX attribute and verify the resulting value or state.
+      FOCUS_ELEMENT:
+        target: element reference
+        effect: Set AXFocused only when supported and settable, then verify focus.
+      TYPE_TEXT:
+        target: focused editable element reference
+        arguments:
+          - text
+        effect: Prefer AXValue; otherwise synthesize Unicode keyboard input after focus revalidation.
+      PRESS_KEY:
+        target: focused application, window, and optional element
+        arguments:
+          - allowlisted key or chord
+        effect: Dispatch keyboard input only after focus revalidation.
+      SCROLL:
+        target: scroll area, web area, list, table, or focused window
+        arguments:
+          - semantic direction
+        effect: Invoke a supported accessibility scroll action or an allowlisted key while the semantic container is focused.
+      WAIT_FOR_STATE:
+        target: application, window, or element predicate
+        effect: Wait on AX or workspace notifications with bounded targeted re-observation.
+      DONE:
+        target: none
+        effect: Complete only when the final-state predicate is proven by observation.
+      BLOCKED:
+        target: none
+        effect: Stop with a precise blocker and no further side effects.
+    requirements:
+      AXACT-1: The planner may select only operations present in this closed set.
+      AXACT-2: PERFORM_ACTION accepts only action names returned by AXUIElementCopyActionNames for the selected element.
+      AXACT-3: SET_VALUE accepts only attributes confirmed settable by AXUIElementIsAttributeSettable.
+      AXACT-4: TYPE_TEXT requires an enabled editable element that is focused immediately before delivery.
+      AXACT-5: PRESS_KEY requires the expected application and window to remain active immediately before delivery.
+      AXACT-6: Clipboard-based text insertion, if used, must preserve and restore prior pasteboard contents when technically possible.
+      AXACT-7: No action accepts or computes a screen coordinate.
+      AXACT-8: Direct mouse events, drag coordinates, and pixel scrolling are prohibited.
+      AXACT-9: An unsupported semantic action produces UNSUPPORTED_ACTION rather than a guessed fallback.
+
+  EXECUTION_LOOP:
+    description: Observe, select, validate, act, and verify state machine.
+    session_states:
+      - created
+      - resolving_application
+      - observing
+      - selecting
+      - validating
+      - acting
+      - verifying
+      - completed
+      - blocked
+      - failed
+      - delivery_uncertain
+    requirements:
+      LOOP-1: Maintain one serialized execution session per orb instance.
+      LOOP-2: Reject or queue a new spoken command while a nonterminal session is active; never interleave actions.
+      LOOP-3: Give Jev the user goal, running applications, selected application and window, projected AX tree, recent verified actions, and prior blockers.
+      LOOP-4: Bound execution by configurable action, model-request, observation-time, and wall-clock budgets.
+      LOOP-5: Default to 30 semantic actions and 120 seconds; emit a specific budget-exhausted blocker when exceeded.
+      LOOP-6: After each action, invalidate the prior snapshot before waiting for effects.
+      LOOP-7: Prefer AXObserver and NSWorkspace notifications; use bounded targeted polling only when the application emits no useful notification.
+      LOOP-8: Do not use a fixed delay as proof of navigation, launch, focus, or mutation.
+      LOOP-9: Detect loops from repeated state fingerprints plus repeated actions, not labels alone.
+      LOOP-10: Permit a repeated label when the underlying application, window, generation, state, or ancestor context changed.
+      LOOP-11: Mark completion only from an explicit goal-specific final-state predicate evaluated against a fresh observation.
+      LOOP-12: Return the final application, window, verified facts, action count, elapsed time, and terminal status.
+
+  PLANNER:
+    description: Jev selection contract over application and accessibility state.
+    input:
+      goal: exact transcribed user request
+      application_catalog: running applications and relevant installed candidates
+      target_surface: selected application and window
+      observation: projected AX nodes and semantic context
+      recent_actions: bounded verified action history
+      constraints: supported operations and remaining budgets
+    output:
+      operation: one AX_ACTIONS operation
+      target_reference: required except for targetless operations
+      action_name: required for PERFORM_ACTION
+      value: required for value or text operations
+      expected_effect: machine-checkable state predicate
+      rationale: short target-selection reason for diagnostics
+    requirements:
+      PLAN-1: Model output must validate against a strict schema before any action.
+      PLAN-2: Element candidates must retain role, name, value summary, state, actions, settable attributes, ancestors, and contextual labels.
+      PLAN-3: Large observations may be partitioned for selection, but no candidate may be dropped solely because of window size, coordinates, or visibility.
+      PLAN-4: Candidate projection must minimize unrelated private content.
+      PLAN-5: Secure values and raw credentials are never included in model input.
+      PLAN-6: The planner may request another observation, application lookup, semantic scroll, or expansion rather than guessing.
+      PLAN-7: Application or recipient ambiguity must produce a clarification blocker rather than choosing a plausible match.
+      PLAN-8: The planner cannot declare DONE without a supplied final-state predicate that the executor can evaluate.
+      PLAN-9: The planner decomposes each runtime command from the observed state and may not rely on command-specific scripts, selectors, labels, or workflow templates.
+      PLAN-10: Application names, websites, recipients, field labels, and desired values are runtime data rather than implementation constants.
+      PLAN-11: The planner may move between multiple applications and windows when the goal requires a cross-application workflow.
+      PLAN-12: The planner derives goal-specific completion predicates from the command and observed semantics rather than selecting from a task-specific completion list.
+      PLAN-13: A previously unseen application is eligible without an implementation change when it exposes standard AX roles, attributes, actions, and state.
+      PLAN-14: No application, domain, or example command may receive a privileged execution path outside the generic catalog, observation, action, and verification interfaces.
+
+  COMMAND_GENERALIZATION:
+    description: Runtime interpretation of previously unseen commands.
+    requirements:
+      GENERAL-1: Accept any transcribed command without requiring a registered intent, command identifier, application adapter, site adapter, or workflow definition.
+      GENERAL-2: Resolve nouns in the command against the live application catalog, AX tree, and observed content.
+      GENERAL-3: Decompose compound goals into verified semantic subgoals while preserving the original command constraints.
+      GENERAL-4: Support workflows that switch applications, launch applications, select windows, navigate hierarchy, enter values, invoke controls, read state, and return to earlier applications.
+      GENERAL-5: Use the same operation schema and executor for native applications, browser chrome, and browser page content.
+      GENERAL-6: Treat examples and evaluation commands as data; production code must contain no branches keyed to Slack, Google Flights, or any other evaluation target.
+      GENERAL-7: Generate verification predicates from the requested outcome and current AX semantics.
+      GENERAL-8: Replan from fresh state when a layout, responsive design, menu structure, or application state differs from prior observations.
+      GENERAL-9: Report a precise accessibility, ambiguity, permission, authentication, or capability blocker when an eligible plan cannot be completed.
+      GENERAL-10: Never claim general support from passing only named demonstration workflows.
+  VERIFICATION:
+    description: Evidence required after semantic actions.
+    effect_predicates:
+      - application became running
+      - application became frontmost
+      - window became main, focused, or unminimized
+      - element became focused
+      - value equals or contains an expected normalized value
+      - selected, expanded, enabled, checked, or visited state changed
+      - a matching node appeared or disappeared
+      - browser web-area title or address value changed
+      - a requested external mutation appeared exactly once in its intended semantic context
+      - all command-derived field, navigation, selection, retrieval, and result constraints are satisfied
+    requirements:
+      VERIFY-1: Each action request includes at least one expected-effect predicate.
+      VERIFY-2: Verification reads a fresh AX observation and never trusts action API return alone.
+      VERIFY-3: A failed idempotent action may be replanned after fresh observation.
+      VERIFY-4: A non-idempotent action with uncertain delivery is not retried automatically.
+      VERIFY-5: Verification distinguishes not_dispatched, dispatched_unverified, verified, and delivery_uncertain.
+      VERIFY-6: DONE requires all explicit command constraints to be visible in the final AX state.
+      VERIFY-7: A read-only research command must stop before purchase, booking, submission, or other unrequested commitment.
+
+  SIDE_EFFECT_SAFETY:
+    description: Scope and replay rules for external mutations.
+    requirements:
+      SAFETY-1: An explicit command to send a message authorizes one message with the requested content to the unambiguously identified recipient or channel.
+      SAFETY-2: Before sending, verify the application, workspace when exposed, conversation or channel, composer focus, and final message text.
+      SAFETY-3: If the target person, conversation, workspace, or message content is ambiguous, stop before submission.
+      SAFETY-4: After submission, verify that the unique message appears in the intended conversation.
+      SAFETY-5: If delivery cannot be determined, return delivery_uncertain and never send again automatically.
+      SAFETY-6: Search and comparison commands authorize navigation and form submission needed to obtain results, but not a purchase or booking.
+      SAFETY-7: Password, MFA, account-choice, consent, or payment prompts stop execution unless separately and explicitly authorized.
+      SAFETY-8: Do not activate, launch, message through, or mutate unrelated applications.
+
+  PRIVACY:
+    description: Accessibility data minimization and diagnostics.
+    requirements:
+      PRIVACY-1: Keep the raw AX tree in process.
+      PRIVACY-2: Send only projected candidates and context necessary for the current selection request.
+      PRIVACY-3: Redact secure fields, tokens, passwords, email bodies unrelated to the goal, and unrelated message history.
+      PRIVACY-4: Structured logs include references, roles, names when non-sensitive, actions, timings, and error codes; they exclude typed secrets and full private content.
+      PRIVACY-5: Screenshots and screen recordings are never captured by the navigation system.
+      PRIVACY-6: Execution logs use a per-session identifier and support reconstruction of decisions without storing protected values.
+
+interfaces:
+  ApplicationDescriptor:
+    required_fields:
+      - application_id
+      - display_name
+      - bundle_identifier
+      - pid_when_running
+      - executable_url
+      - installed
+      - running
+      - active
+      - hidden
+      - accessibility_available
+      - windows
+  WindowDescriptor:
+    required_fields:
+      - window_id
+      - title
+      - role
+      - subrole
+      - minimized
+      - main
+      - focused
+  AXSnapshot:
+    required_fields:
+      - session_id
+      - generation
+      - application
+      - window
+      - captured_at
+      - tree_fingerprint
+      - nodes
+      - actionable_elements
+      - partial_read_errors
+  AXNode:
+    required_fields:
+      - reference
+      - role
+      - subrole
+      - name
+      - value_summary
+      - states
+      - supported_actions
+      - settable_attributes
+      - parent_reference
+      - ancestor_context
+      - child_references
+  ActionRequest:
+    required_fields:
+      - session_id
+      - snapshot_generation
+      - operation
+      - target_reference
+      - arguments
+      - expected_effect
+      - idempotency
+  ActionResult:
+    required_fields:
+      - operation
+      - target_reference
+      - delivery
+      - verified
+      - observed_effect
+      - error_code
+      - error_message
+      - elapsed_ms
+  ExecutionReport:
+    required_fields:
+      - session_id
+      - goal
+      - status
+      - final_application
+      - final_window
+      - verified_facts
+      - actions
+      - blocker
+      - elapsed_ms
+
+failure_codes:
+  permission:
+    - ACCESSIBILITY_PERMISSION_REQUIRED
+    - MICROPHONE_PERMISSION_REQUIRED
+  catalog:
+    - APPLICATION_NOT_FOUND
+    - AMBIGUOUS_APPLICATION
+    - APPLICATION_LAUNCH_FAILED
+    - APPLICATION_ACTIVATION_TIMEOUT
+    - WINDOW_NOT_FOUND
+    - AMBIGUOUS_WINDOW
+  observation:
+    - AX_ROOT_UNAVAILABLE
+    - AX_CANNOT_COMPLETE
+    - AX_PROCESS_TERMINATED
+    - AX_OBSERVATION_TIMEOUT
+    - AX_BUDGET_EXCEEDED
+  action:
+    - STALE_REFERENCE
+    - AMBIGUOUS_TARGET
+    - TARGET_DISABLED
+    - TARGET_NOT_FOCUSABLE
+    - ATTRIBUTE_NOT_SETTABLE
+    - UNSUPPORTED_ACTION
+    - FOCUS_CHANGED
+    - ACTION_NOT_DISPATCHED
+    - ACTION_EFFECT_NOT_OBSERVED
+    - DELIVERY_UNCERTAIN
+  planning:
+    - INVALID_MODEL_RESPONSE
+    - NO_ACTIONABLE_TARGET
+    - GOAL_AMBIGUOUS
+    - LOOP_DETECTED
+    - ACTION_BUDGET_EXHAUSTED
+    - TIME_BUDGET_EXHAUSTED
+    - USER_INTERVENTION_REQUIRED
+
+performance:
+  requirements:
+    PERF-1: Transition from recording completion to thinking state in under 50 ms.
+    PERF-2: Return a typical focused-window AX observation in under 300 ms at p95 on the target workstation.
+    PERF-3: Do not traverse accessibility trees for background applications until one is selected.
+    PERF-4: Cache the installed application catalog and invalidate it incrementally.
+    PERF-5: Avoid repeated attribute reads by batching attributes and retaining one snapshot per generation.
+    PERF-6: React to AX or workspace notifications before using targeted polling.
+    PERF-7: Keep model context bounded through semantic projection and partitioning without removing valid candidates.
+
+migration:
+  implementation_order:
+    - Build application catalog and application/window activation with no planner integration.
+    - Build read-only AX snapshot extraction and structured diagnostics.
+    - Add generation-scoped element references and stale-target validation.
+    - Add semantic actions and post-action verification against a local fixture application.
+    - Connect JevDispatcher to the bounded execution loop.
+    - Add application switching and launching to planner actions.
+    - Validate native Slack and browser workflows using AX only.
+    - Remove the vision runtime, screenshot capture, coordinate dispatch, and obsolete dependencies.
+  clean_cutover_requirements:
+    - No production callsite invokes vision/run_vision.sh.
+    - No production navigation code reads or writes /tmp/jev_screen.png.
+    - No production navigation code imports YOLO, OCR, Pillow, Quartz mouse APIs, or browser-harness.
+    - No coordinate action schema remains accepted.
+    - Existing browser and native-app navigation succeeds through the same AX execution path.
+    - Screen Recording is removed from required setup and documentation.
+  preserved_user_work:
+    - Existing unrelated orb animation, audio, Whisper, and hotkey behavior is not rewritten as part of the AX migration.
+
+acceptance:
+  arbitrary_command_contract:
+    definition: |
+      An arbitrary command is a previously unseen natural-language goal that can
+      be completed using the closed semantic AX_ACTIONS operation set against
+      controls and state exposed through macOS accessibility. The implementation
+      must interpret the goal from live state. It may not require a command ID,
+      application-specific adapter, domain-specific selector, recorded workflow,
+      or implementation change.
+    eligibility:
+      - Every required application is running or discoverable as an installed launchable application.
+      - Every required control and completion fact is exposed through macOS accessibility.
+      - The goal can be expressed through the generic application, window, AX action, text, key, scroll, wait, and verification operations.
+      - The command does not require bypassing credentials, MFA, consent, permissions, payment confirmation, or an inaccessible canvas.
+      - Any external side effect is explicit and its target and payload are unambiguous.
+    requirements:
+      ARBITRARY-1: Previously unseen eligible commands execute without code, configuration, prompt-template, or selector changes.
+      ARBITRARY-2: Commands may target any accessible native application, browser, or website rather than an allowlist.
+      ARBITRARY-3: Commands may contain multiple ordered constraints and span multiple applications or windows.
+      ARBITRARY-4: Application and element resolution uses live catalogs and AX observations rather than names embedded in source code.
+      ARBITRARY-5: Every intermediate action and final outcome is verified from fresh AX state.
+      ARBITRARY-6: Responsive layout changes, reordered controls, different window sizes, and unrelated application state do not select a different target by position.
+      ARBITRARY-7: A truly ambiguous goal requests clarification or returns a precise blocker; it never guesses a recipient, application, account, or destructive action.
+      ARBITRARY-8: An unsupported command fails explicitly at the inaccessible capability boundary and never falls back to pixels or coordinates.
+
+  capability_matrix:
+    - capability: application lifecycle
+      required_behaviors:
+        - list running and installed applications
+        - launch, activate, hide, unhide, and terminate only when explicitly requested
+        - wait for launch and activation state
+    - capability: window management
+      required_behaviors:
+        - enumerate, select, restore, raise, and focus windows
+        - operate across minimized, background, small, off-screen, and secondary-display windows
+    - capability: semantic navigation
+      required_behaviors:
+        - traverse menus, tabs, groups, lists, tables, outlines, web areas, links, dialogs, and toolbars
+        - expand, collapse, select, scroll, and follow accessible hierarchy
+    - capability: data entry
+      required_behaviors:
+        - focus and populate text fields, search fields, text areas, combo boxes, checkboxes, radios, date controls, and accessible custom widgets
+        - preserve exact user-provided text and values
+    - capability: content retrieval
+      required_behaviors:
+        - read requested labels, values, selections, table rows, list items, document content, and result summaries
+        - return only facts proven by current AX state
+    - capability: external mutation
+      required_behaviors:
+        - submit, send, create, edit, or delete only when the command explicitly requests that side effect
+        - verify the exact target and resulting state and avoid duplicate replay
+    - capability: multi-application workflow
+      required_behaviors:
+        - carry command constraints across application and window switches
+        - transfer user-requested non-secret information between applications
+        - return to a prior application and continue from a fresh observation
+    - capability: dynamic interface recovery
+      required_behaviors:
+        - reobserve and replan after rerenders, dialogs, menus, responsive layouts, delayed loading, and reordered controls
+        - reject stale or ambiguous references before input
+
+  general:
+    - id: ACCEPT-1
+      requirement: A command can name any running application, switch to it, select one of its windows, and continue from a fresh AX observation.
+    - id: ACCEPT-2
+      requirement: A command can name any installed non-running application, launch it, focus its initial window, and continue from a fresh AX observation.
+    - id: ACCEPT-3
+      requirement: A full LIST_APPLICATIONS result contains all regular running GUI applications and every indexed launchable application discovered by the application catalog.
+    - id: ACCEPT-4
+      requirement: Moving a target window, obscuring it, placing it on another display, or changing display scale does not change target selection or action mechanics.
+    - id: ACCEPT-5
+      requirement: The workflow remains functional at the application's smallest supported window size, including responsive layouts that move controls into menus or require semantic scrolling.
+    - id: ACCEPT-6
+      requirement: A minimized target window is restored and focused before control observation.
+    - id: ACCEPT-7
+      requirement: Duplicate labels cause semantic disambiguation or a blocker, never a first-match action.
+    - id: ACCEPT-8
+      requirement: A rerender between selection and execution produces STALE_REFERENCE and no input.
+    - id: ACCEPT-9
+      requirement: No successful acceptance run requests Screen Recording permission or captures screen pixels.
+    - id: ACCEPT-10
+      requirement: Inspection confirms no mouse-coordinate, image-derived, application-specific, site-specific, or command-specific execution path occurred.
+
+  held_out_command_evaluation:
+    construction:
+      - Freeze implementation and prompts before constructing the final command corpus.
+      - Use at least 30 commands not present in source, prompts, fixtures, documentation, or development tests.
+      - Cover at least eight unrelated applications, including native applications and at least two websites through a browser.
+      - Include simple, compound, multi-window, and multi-application commands.
+      - Include read-only, data-entry, navigation, search, creation, editing, and explicitly authorized external-side-effect commands.
+      - Vary application starting state, active application, selected window, window size, window position, visibility, and responsive layout.
+      - Record eligibility before execution using only the arbitrary-command contract, not expected implementation behavior.
+    pass_rule: Every eligible held-out command must complete and prove all requested constraints from fresh AX state.
+    failure_rule: Any failed eligible command blocks release; an ineligible command must return the correct explicit capability boundary without unintended input.
+    anti_overfitting:
+      - Production code and prompts contain no held-out command text, expected target labels, domain names, application names, or action sequences.
+      - The evaluator selects command targets and values after implementation freeze.
+      - The execution report proves use of generic application, window, AX observation, AX action, and verification interfaces.
+
+  representative_examples:
+    disclaimer: |
+      These scenarios illustrate the arbitrary-command contract. They are not
+      privileged workflows and passing them alone does not satisfy acceptance.
+    slack_message:
+      command_template: "Message <unambiguous target> on Slack that I'm busy. Test token <token>."
+      required_outcome:
+        - Discover, launch or switch to, and observe Slack through the generic application and AX interfaces.
+        - Resolve the exact workspace and conversation from live semantics.
+        - Send exactly one message containing the requested text and unique token.
+        - Verify the token in the intended conversation or return delivery_uncertain without retry.
+    google_flights:
+      command: Open Google Flights and find a one-way flight from Seattle to Denver.
+      required_outcome:
+        - Select or launch a browser through generic application resolution.
+        - Navigate and populate the accessible interface through generic AX operations.
+        - Verify one-way, Seattle or SEA, Denver or DEN, and a nonempty result set.
+        - Stop before booking, purchasing, or entering payment information.
+    shared_window_matrix:
+      - target application frontmost at normal size
+      - target application behind another application
+      - target window minimized
+      - target window at its smallest supported size with responsive controls
+      - target window partially off-screen or on a secondary display
+
+verification_plan:
+  unit:
+    - Parse generated AX trees containing arbitrary combinations of native controls, browser web areas, duplicate labels, tables, lists, dialogs, and menus.
+    - Verify application-name resolution precedence and ambiguity handling without an application allowlist.
+    - Verify generation-scoped references reject stale snapshots.
+    - Verify identity matching permits exactly one live match and rejects zero or multiple matches.
+    - Verify action capability derives from supported actions and settable attributes.
+    - Verify secure values are redacted from snapshots, logs, and planner projections.
+    - Verify non-idempotent delivery-uncertain actions cannot be replayed.
+    - Verify loop detection uses state and action fingerprints rather than labels alone.
+    - Generate valid semantic action sequences against fixture trees and verify no application-specific branch is required.
+  integration_fixture:
+    description: A deterministic signed macOS fixture application exercised through real AX APIs.
+    scenarios:
+      - Generate varied forms, menus, tabs, lists, tables, dialogs, scroll areas, labels, values, and ordering at runtime.
+      - Launch, activate, hide, unhide, minimize, restore, and focus windows.
+      - Execute randomly composed eligible goals through generic AX actions.
+      - Handle delayed state changes and AX notifications without fixed sleeps.
+      - Invalidate selected elements through rerender before execution.
+      - Present duplicate names in distinct ancestor contexts.
+      - Run at minimum window size and on a secondary display.
+  live:
+    - Execute the frozen held-out command corpus across all required applications and websites.
+    - Include the Slack and Google Flights scenarios as two representative corpus entries, not special gates.
+    - Repeat selected commands across every shared window condition.
+    - Inspect structured reports to prove all targets and actions came from generic AX references and runtime observations.
+    - Confirm no screenshot file, screen-capture call, coordinate event, browser-debugging connection, or target-specific adapter was used.
+  release_gates:
+    - All unit and generated integration scenarios pass.
+    - Every eligible command in the held-out corpus passes.
+    - Every ineligible command stops at the correct explicit boundary without unintended input.
+    - Representative messaging completes without duplicate delivery.
+    - Representative travel research completes without booking side effects.
+    - Every window-condition matrix passes or reports a documented application accessibility defect with reproducible AX evidence.
+    - Static review finds no application-specific, domain-specific, selector-specific, or command-specific production branches.
+    - The obsolete vision execution path and dependencies are removed.
+    - README and permission instructions describe generic AX navigation and no longer claim visual navigation.

@@ -1,0 +1,13 @@
+{
+  "": {
+    "dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrbTests.build/JevOrbTests.d",
+    "object": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrbTests.build/JevOrbTests.o",
+    "swift-dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrbTests.build/master.swiftdeps"
+  },
+  "/Users/danielwalker/Developer/jev-orb/Tests/JevOrbTests/AXSerializationTests.swift": {
+    "object": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrbTests.build/AXSerializationTests.swift.o",
+    "swiftmodule": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrbTests.build/AXSerializationTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrbTests.build/AXSerializationTests.swiftdeps",
+    "diagnostics": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrbTests.build/AXSerializationTests.dia"
+  }
+}

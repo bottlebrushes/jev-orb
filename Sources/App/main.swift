@@ -1,14 +1,16 @@
-// @acid: OVERLAY-1, OVERLAY-2, OVERLAY-3, OVERLAY-4, HOTKEY-1
+// @acid: OVERLAY-1, OVERLAY-2, OVERLAY-3, PERMISSIONS-1, PERMISSIONS-2, PERMISSIONS-4
 import AppKit
+import ApplicationServices
 import SwiftUI
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var panel: FloatingPanel?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Remain outside the regular-app AX catalog and preserve the user's target.
         NSApp.setActivationPolicy(.accessory)
 
-        // Prompt for Accessibility permission if not yet trusted
+        // AX navigation is owned by this process; request Accessibility trust only.
         let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true]
         let isTrusted = AXIsProcessTrustedWithOptions(options)
         NSLog("[JevOrb] Accessibility isTrusted: %@", isTrusted ? "YES" : "NO")
@@ -22,16 +24,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         floatingPanel.orderFrontRegardless()
 
         self.panel = floatingPanel
-
-        // Verify screen capture immediately on launch
-        Task {
-            do {
-                let path = try await ScreenCaptureHelper.shared.captureVisibleScreen(outputPath: "/tmp/jev_screen.png")
-                NSLog("[JevOrb Startup Capture] SUCCESS! Wrote to %@", path)
-            } catch {
-                NSLog("[JevOrb Startup Capture] ERROR: %@", error.localizedDescription)
-            }
-        }
     }
 
     func applicationWillTerminate(_ notification: Notification) {

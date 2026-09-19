@@ -1,0 +1,3 @@
+module JevOrbPackageTests {
+    header "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrbPackageTests.build/include/JevOrbPackageTests-Swift.h"
+}

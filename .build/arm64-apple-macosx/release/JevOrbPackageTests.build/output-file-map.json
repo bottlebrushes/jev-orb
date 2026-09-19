@@ -1,0 +1,13 @@
+{
+  "": {
+    "dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrbPackageTests.build/JevOrbPackageTests.d",
+    "object": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrbPackageTests.build/JevOrbPackageTests.o",
+    "swift-dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrbPackageTests.build/master.swiftdeps"
+  },
+  "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrbPackageTests.derived/runner.swift": {
+    "object": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrbPackageTests.build/runner.swift.o",
+    "swiftmodule": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrbPackageTests.build/runner~partial.swiftmodule",
+    "swift-dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrbPackageTests.build/runner.swiftdeps",
+    "diagnostics": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrbPackageTests.build/runner.dia"
+  }
+}

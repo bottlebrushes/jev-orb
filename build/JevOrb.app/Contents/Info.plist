@@ -21,8 +21,6 @@
     <key>LSUIElement</key>
     <true/>
     <key>NSMicrophoneUsageDescription</key>
-    <string>JevOrb needs microphone access to listen to your voice commands for autonomous browser control.</string>
-    <key>NSAppleEventsUsageDescription</key>
-    <string>JevOrb needs automation access to control browser windows.</string>
+    <string>JevOrb uses your microphone to hear voice commands for navigating apps through macOS Accessibility controls.</string>
 </dict>
 </plist>

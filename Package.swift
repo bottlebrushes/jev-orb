@@ -13,6 +13,11 @@ let package = Package(
         .executableTarget(
             name: "JevOrb",
             path: "Sources"
+        ),
+        .testTarget(
+            name: "JevOrbTests",
+            dependencies: ["JevOrb"],
+            path: "Tests/JevOrbTests"
         )
     ]
 )

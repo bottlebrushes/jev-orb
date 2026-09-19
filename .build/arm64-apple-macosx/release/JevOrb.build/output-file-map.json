@@ -4,6 +4,30 @@
     "object": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/JevOrb.o",
     "swift-dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/master.swiftdeps"
   },
+  "/Users/danielwalker/Developer/jev-orb/Sources/Accessibility/AXSession.swift": {
+    "object": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/AXSession.swift.o",
+    "swiftmodule": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/AXSession~partial.swiftmodule",
+    "swift-dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/AXSession.swiftdeps",
+    "diagnostics": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/AXSession.dia"
+  },
+  "/Users/danielwalker/Developer/jev-orb/Sources/Accessibility/AXTypes.swift": {
+    "object": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/AXTypes.swift.o",
+    "swiftmodule": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/AXTypes~partial.swiftmodule",
+    "swift-dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/AXTypes.swiftdeps",
+    "diagnostics": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/AXTypes.dia"
+  },
+  "/Users/danielwalker/Developer/jev-orb/Sources/Accessibility/ApplicationCatalog.swift": {
+    "object": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/ApplicationCatalog.swift.o",
+    "swiftmodule": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/ApplicationCatalog~partial.swiftmodule",
+    "swift-dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/ApplicationCatalog.swiftdeps",
+    "diagnostics": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/ApplicationCatalog.dia"
+  },
+  "/Users/danielwalker/Developer/jev-orb/Sources/Accessibility/ApplicationDescriptor.swift": {
+    "object": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/ApplicationDescriptor.swift.o",
+    "swiftmodule": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/ApplicationDescriptor~partial.swiftmodule",
+    "swift-dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/ApplicationDescriptor.swiftdeps",
+    "diagnostics": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/ApplicationDescriptor.dia"
+  },
   "/Users/danielwalker/Developer/jev-orb/Sources/App/ContentView.swift": {
     "object": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/ContentView.swift.o",
     "swiftmodule": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/ContentView~partial.swiftmodule",
@@ -28,23 +52,11 @@
     "swift-dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/AudioRecorder.swiftdeps",
     "diagnostics": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/AudioRecorder.dia"
   },
-  "/Users/danielwalker/Developer/jev-orb/Sources/Audio/ScreenCaptureHelper.swift": {
-    "object": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/ScreenCaptureHelper.swift.o",
-    "swiftmodule": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/ScreenCaptureHelper~partial.swiftmodule",
-    "swift-dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/ScreenCaptureHelper.swiftdeps",
-    "diagnostics": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/ScreenCaptureHelper.dia"
-  },
   "/Users/danielwalker/Developer/jev-orb/Sources/Dispatch/JevDispatcher.swift": {
     "object": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/JevDispatcher.swift.o",
     "swiftmodule": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/JevDispatcher~partial.swiftmodule",
     "swift-dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/JevDispatcher.swiftdeps",
     "diagnostics": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/JevDispatcher.dia"
-  },
-  "/Users/danielwalker/Developer/jev-orb/Sources/Driver/InputDriver.swift": {
-    "object": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/InputDriver.swift.o",
-    "swiftmodule": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/InputDriver~partial.swiftmodule",
-    "swift-dependencies": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/InputDriver.swiftdeps",
-    "diagnostics": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/InputDriver.dia"
   },
   "/Users/danielwalker/Developer/jev-orb/Sources/Orb/OrbConfiguration.swift": {
     "object": "/Users/danielwalker/Developer/jev-orb/.build/arm64-apple-macosx/release/JevOrb.build/OrbConfiguration.swift.o",
